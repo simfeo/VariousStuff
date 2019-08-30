@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>
+		
+		const mm = Math.pow(2, 1.0/40);
+
+		function example4(context,frequency,type)
+		{
+			o=context.createOscillator()
+			g=context.createGain()
+			o.type=type
+			o.connect(g)
+			o.frequency.value=frequency
+			g.connect(context.destination)
+			o.start(0)
+			g.gain.exponentialRampToValueAtTime(0.00001,context.currentTime+1)
+		}
+
+		const sleep = async function(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+		}
+
+		const myFunction = async function() 
+		{
+			var context=new AudioContext();
+			let text =  document.getElementById("sourcetext").value;
+			//console.log(mm);
+			var i;
+			for (i = 0; i < text.length; i++) {
+				let symbol = text[i];
+				await sleep(50);
+				let cd = symbol.charCodeAt(0);
+				console.log(cd);
+				if (cd == 10 || cd == 32)
+				{
+					await sleep(50);
+				}
+				else
+				{
+			// example4(110.0, Math.pow(mm, symbol.charCodeAt(0)))
+			example4(context, 55.0*Math.pow( mm, symbol.charCodeAt(0)),"sine");
+			}
+			}
+		}
+	</script>
+
+	<title>Text to music</title>
+</head>
+<body>
+
+
+	<textarea rows="4" cols="50" name="comment" id="sourcetext">
+Enter text here...
+	</textarea>
+	<br>
+	<button onclick="myFunction()">Click me</button>
+
+
+
+</body>
+</html>

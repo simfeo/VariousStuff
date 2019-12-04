@@ -1,6 +1,7 @@
 # ArmASCII8 to utf converter
 # specify input and output documents
 # tested on python 3.7
+# converted map logic taken from http://unicodenow.com/
 import sys
 
 arm_map = {}

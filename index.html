@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+    <p>Select key length</p>
+    <input type="radio" id="len10" name="key_length" value="10">
+    <label for="len10">10</label><br>
+    <input type="radio" id="len16" name="key_length" value="16">
+    <label for="len16">16</label><br>
+    <input type="radio" id="len32" name="key_length" value="32" checked>
+    <label for="len32">32</label><br>
+    <input type="radio" id="len64" name="key_length" value="64">
+    <label for="len64">64</label><br>
+    <br><br>
+
+<button type="button" onclick="mmm();">Generate!</button><br>
+<pre id="span1"></pre><br>
+<pre id="span2"></pre><br>
+<pre id="span3"></pre><br>
+<pre id="span4"></pre><br>
+<script>
+
+class WordArray{
+        constructor(words, sigBytes)
+        {
+                this.words = words;
+                this.sigBytes = sigBytes;
+        }
+
+        toString()
+        {
+                return [...new Uint32Array(this.words)]
+                        .map(x => x.toString(16).padStart(8, '0'))
+                        .join('');
+        }
+}
+
+var cryptoSecureRandomInt = function () {
+        if (crypto) {
+                // Use getRandomValues method (Browser)
+                if (typeof crypto.getRandomValues === 'function') {
+                        try {
+                                return crypto.getRandomValues(new Uint32Array(1))[0];
+                        } catch (err) {}
+                }
+
+                // Use randomBytes method (NodeJS)
+                if (typeof crypto.randomBytes === 'function') {
+                        try {
+                                return crypto.randomBytes(4).readInt32LE();
+                        } catch (err) {}
+                }
+        }
+
+        throw new Error('Native crypto module could not be used to get secure random number.');
+}
+
+let secure_random = function (nBytes)
+{
+        let words = [];
+
+        for (let i = 0; i < nBytes; i += 4) {
+                words.push(cryptoSecureRandomInt());
+        }
+
+        return new WordArray(words, nBytes);
+}
+
+function mmm()
+{
+    for (let a = 1; a <5; ++a)
+    {
+        let b = 32;
+        if (document.getElementById("len32").checked)
+        {
+            b = 32;
+        }
+        else if (document.getElementById("len16").checked)
+        {
+            b = 16;
+        }
+        else if (document.getElementById("len64").checked)
+        {
+            b = 64;
+        }
+        else if (document.getElementById("len10").checked)
+        {
+            b = 10;
+        } 
+
+        let result = secure_random(b/2).toString().toUpperCase();
+        
+        if (b == 10)
+        {
+            result = result.substr(0,10);
+        }
+        document.getElementById("span"+a).innerHTML = result;
+    }
+
+};
+</script>
+
+</body>
+</html>

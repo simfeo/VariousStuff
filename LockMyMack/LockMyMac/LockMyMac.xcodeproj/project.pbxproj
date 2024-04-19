@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2009824E1E44D9D5008C5285 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2009824D1E44D9D5008C5285 /* AppDelegate.m */; };
+		200982511E44D9D5008C5285 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 200982501E44D9D5008C5285 /* main.m */; };
+		200982541E44D9D5008C5285 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 200982531E44D9D5008C5285 /* ViewController.m */; };
+		200982561E44D9D5008C5285 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 200982551E44D9D5008C5285 /* Assets.xcassets */; };
+		200982591E44D9D5008C5285 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 200982571E44D9D5008C5285 /* Main.storyboard */; };
+		200982641E44D9D5008C5285 /* LockMyMacTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 200982631E44D9D5008C5285 /* LockMyMacTests.m */; };
+		2009826F1E44D9D5008C5285 /* LockMyMacUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2009826E1E44D9D5008C5285 /* LockMyMacUITests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		200982601E44D9D5008C5285 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 200982411E44D9D5008C5285 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 200982481E44D9D5008C5285;
+			remoteInfo = LockMyMac;
+		};
+		2009826B1E44D9D5008C5285 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 200982411E44D9D5008C5285 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 200982481E44D9D5008C5285;
+			remoteInfo = LockMyMac;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		200982491E44D9D5008C5285 /* LockMyMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LockMyMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2009824C1E44D9D5008C5285 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		2009824D1E44D9D5008C5285 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		200982501E44D9D5008C5285 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		200982521E44D9D5008C5285 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		200982531E44D9D5008C5285 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		200982551E44D9D5008C5285 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		200982581E44D9D5008C5285 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		2009825A1E44D9D5008C5285 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2009825F1E44D9D5008C5285 /* LockMyMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LockMyMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		200982631E44D9D5008C5285 /* LockMyMacTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LockMyMacTests.m; sourceTree = "<group>"; };
+		200982651E44D9D5008C5285 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2009826A1E44D9D5008C5285 /* LockMyMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LockMyMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2009826E1E44D9D5008C5285 /* LockMyMacUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LockMyMacUITests.m; sourceTree = "<group>"; };
+		200982701E44D9D5008C5285 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		200982461E44D9D5008C5285 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2009825C1E44D9D5008C5285 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200982671E44D9D5008C5285 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		200982401E44D9D5008C5285 = {
+			isa = PBXGroup;
+			children = (
+				2009824B1E44D9D5008C5285 /* LockMyMac */,
+				200982621E44D9D5008C5285 /* LockMyMacTests */,
+				2009826D1E44D9D5008C5285 /* LockMyMacUITests */,
+				2009824A1E44D9D5008C5285 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2009824A1E44D9D5008C5285 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				200982491E44D9D5008C5285 /* LockMyMac.app */,
+				2009825F1E44D9D5008C5285 /* LockMyMacTests.xctest */,
+				2009826A1E44D9D5008C5285 /* LockMyMacUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2009824B1E44D9D5008C5285 /* LockMyMac */ = {
+			isa = PBXGroup;
+			children = (
+				2009824C1E44D9D5008C5285 /* AppDelegate.h */,
+				2009824D1E44D9D5008C5285 /* AppDelegate.m */,
+				200982521E44D9D5008C5285 /* ViewController.h */,
+				200982531E44D9D5008C5285 /* ViewController.m */,
+				200982551E44D9D5008C5285 /* Assets.xcassets */,
+				200982571E44D9D5008C5285 /* Main.storyboard */,
+				2009825A1E44D9D5008C5285 /* Info.plist */,
+				2009824F1E44D9D5008C5285 /* Supporting Files */,
+			);
+			path = LockMyMac;
+			sourceTree = "<group>";
+		};
+		2009824F1E44D9D5008C5285 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				200982501E44D9D5008C5285 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		200982621E44D9D5008C5285 /* LockMyMacTests */ = {
+			isa = PBXGroup;
+			children = (
+				200982631E44D9D5008C5285 /* LockMyMacTests.m */,
+				200982651E44D9D5008C5285 /* Info.plist */,
+			);
+			path = LockMyMacTests;
+			sourceTree = "<group>";
+		};
+		2009826D1E44D9D5008C5285 /* LockMyMacUITests */ = {
+			isa = PBXGroup;
+			children = (
+				2009826E1E44D9D5008C5285 /* LockMyMacUITests.m */,
+				200982701E44D9D5008C5285 /* Info.plist */,
+			);
+			path = LockMyMacUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		200982481E44D9D5008C5285 /* LockMyMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 200982731E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMac" */;
+			buildPhases = (
+				200982451E44D9D5008C5285 /* Sources */,
+				200982461E44D9D5008C5285 /* Frameworks */,
+				200982471E44D9D5008C5285 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LockMyMac;
+			productName = LockMyMac;
+			productReference = 200982491E44D9D5008C5285 /* LockMyMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2009825E1E44D9D5008C5285 /* LockMyMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 200982761E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMacTests" */;
+			buildPhases = (
+				2009825B1E44D9D5008C5285 /* Sources */,
+				2009825C1E44D9D5008C5285 /* Frameworks */,
+				2009825D1E44D9D5008C5285 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				200982611E44D9D5008C5285 /* PBXTargetDependency */,
+			);
+			name = LockMyMacTests;
+			productName = LockMyMacTests;
+			productReference = 2009825F1E44D9D5008C5285 /* LockMyMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		200982691E44D9D5008C5285 /* LockMyMacUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 200982791E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMacUITests" */;
+			buildPhases = (
+				200982661E44D9D5008C5285 /* Sources */,
+				200982671E44D9D5008C5285 /* Frameworks */,
+				200982681E44D9D5008C5285 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2009826C1E44D9D5008C5285 /* PBXTargetDependency */,
+			);
+			name = LockMyMacUITests;
+			productName = LockMyMacUITests;
+			productReference = 2009826A1E44D9D5008C5285 /* LockMyMacUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		200982411E44D9D5008C5285 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = Smbat.makiyan;
+				TargetAttributes = {
+					200982481E44D9D5008C5285 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					2009825E1E44D9D5008C5285 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 200982481E44D9D5008C5285;
+					};
+					200982691E44D9D5008C5285 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 200982481E44D9D5008C5285;
+					};
+				};
+			};
+			buildConfigurationList = 200982441E44D9D5008C5285 /* Build configuration list for PBXProject "LockMyMac" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 200982401E44D9D5008C5285;
+			productRefGroup = 2009824A1E44D9D5008C5285 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				200982481E44D9D5008C5285 /* LockMyMac */,
+				2009825E1E44D9D5008C5285 /* LockMyMacTests */,
+				200982691E44D9D5008C5285 /* LockMyMacUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		200982471E44D9D5008C5285 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200982561E44D9D5008C5285 /* Assets.xcassets in Resources */,
+				200982591E44D9D5008C5285 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2009825D1E44D9D5008C5285 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200982681E44D9D5008C5285 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		200982451E44D9D5008C5285 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200982541E44D9D5008C5285 /* ViewController.m in Sources */,
+				200982511E44D9D5008C5285 /* main.m in Sources */,
+				2009824E1E44D9D5008C5285 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2009825B1E44D9D5008C5285 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200982641E44D9D5008C5285 /* LockMyMacTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200982661E44D9D5008C5285 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2009826F1E44D9D5008C5285 /* LockMyMacUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		200982611E44D9D5008C5285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 200982481E44D9D5008C5285 /* LockMyMac */;
+			targetProxy = 200982601E44D9D5008C5285 /* PBXContainerItemProxy */;
+		};
+		2009826C1E44D9D5008C5285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 200982481E44D9D5008C5285 /* LockMyMac */;
+			targetProxy = 2009826B1E44D9D5008C5285 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		200982571E44D9D5008C5285 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				200982581E44D9D5008C5285 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		200982711E44D9D5008C5285 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		200982721E44D9D5008C5285 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		200982741E44D9D5008C5285 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		200982751E44D9D5008C5285 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		200982771E44D9D5008C5285 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMacTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMacTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LockMyMac.app/Contents/MacOS/LockMyMac";
+			};
+			name = Debug;
+		};
+		200982781E44D9D5008C5285 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMacTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMacTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LockMyMac.app/Contents/MacOS/LockMyMac";
+			};
+			name = Release;
+		};
+		2009827A1E44D9D5008C5285 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMacUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMacUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = LockMyMac;
+			};
+			name = Debug;
+		};
+		2009827B1E44D9D5008C5285 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LockMyMacUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = idimus.LockMyMacUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = LockMyMac;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		200982441E44D9D5008C5285 /* Build configuration list for PBXProject "LockMyMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				200982711E44D9D5008C5285 /* Debug */,
+				200982721E44D9D5008C5285 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		200982731E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				200982741E44D9D5008C5285 /* Debug */,
+				200982751E44D9D5008C5285 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		200982761E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				200982771E44D9D5008C5285 /* Debug */,
+				200982781E44D9D5008C5285 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		200982791E44D9D5008C5285 /* Build configuration list for PBXNativeTarget "LockMyMacUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2009827A1E44D9D5008C5285 /* Debug */,
+				2009827B1E44D9D5008C5285 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 200982411E44D9D5008C5285 /* Project object */;
+}

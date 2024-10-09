@@ -45,17 +45,15 @@ if __name__ == "__main__":
     data["y_z"] = [0] * len(data["x"])
     data["y"] = [0] * len(data["x"])
 
+    generation_passes = 100000
     for i in range (100000):
         ziggurat(data["y_z"])
         box_muller(data["y"])
-
-    # fig = px.bar(data, x='x', y='y')
-    # fig.show()
-
-    # fig = px.line(data, x="x", y="y")
-    # fig.show()
+    
+    data["y_norm"] = [fi(x/100 - 5)*generation_passes/100 for x in range(len(data["x"]))]
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data["x"], y=data["y"], mode='lines', name="Box–Muller transform"))
     fig.add_trace(go.Scatter(x=data["x"], y=data["y_z"], mode='lines', name="Ziggurat"))
+    fig.add_trace(go.Scatter(x=data["x"], y=data["y_norm"], mode='lines', name="Gauss"))
     fig.show()

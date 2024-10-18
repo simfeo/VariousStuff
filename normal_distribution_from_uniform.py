@@ -36,7 +36,7 @@ def box_muller(data):
     fi = random.uniform(0.0,1)
     r = random.uniform(0.0,1)
     z0 = math.cos(2*math.pi*fi)*math.sqrt(-2*math.log2(r))
-    z0_out = clamp(int(z0 * 100) + 500, 0, 999)
+    z0_out = clamp(int(z0 * 100 + 500), 0, 999)
     data[z0_out] += 1
 
 if __name__ == "__main__":

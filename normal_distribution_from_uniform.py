@@ -20,8 +20,8 @@ def clamp(i, m_min, m_max):
 def fi(x):
     return 1.0/math.sqrt(2*math.pi)*math.pow(math.e,-0.5*x*x)
 
-max_y = fi(0)
 def ziggurat(data):
+    max_y = fi(0)
     while True:
         indx = random.randrange(-500,500)
         x = indx / 100.0

@@ -1,8 +1,6 @@
 import pytorch_lightning as L
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset  # Import Dataset
 import torchvision
 import matplotlib.pyplot as plt
@@ -11,11 +9,14 @@ import imageio as iio
 
 from PIL import Image
 import os
+import sys
+from pathlib import Path
 
 from torch.utils.data import random_split,  DataLoader, Dataset
 
 import torch.nn as nn
 import torch.nn.functional as F
+import datetime
 
 class Discriminator(nn.Module):
     def __init__(self):
@@ -69,7 +70,12 @@ class Generator(nn.Module):
         x = F.relu(x)
 
         return torch.tanh(self.conv(x)) # Tanh for normalization to [-1, 1]
-      
+
+  
+# Assuming Generator and Discriminator classes are defined elsewhere
+# For example:
+# class Generator(nn.Module): ...
+# class Discriminator(nn.Module): ...
 
 def rgb_transform(image):
     return image[:3, :, :]  # Keep only the first 3 channels (RGB)
@@ -178,156 +184,48 @@ class GAN(L.LightningModule):
 
 if __name__ == '__main__':
     # Your main code here
-    gan_model = GAN()
-    trainer = L.Trainer()
-    trainer.fit(gan_model)
+    if len (sys.argv) == 1:
+        gan_model = GAN()
+        trainer = L.Trainer()
+        trainer.fit(gan_model)
+    elif sys.argv[1] == "--generate":
+        print ("genarating")
+        # 1. Load the Trained Generator (as you've done)
+        checkpoint = "lightning_logs/version_12/checkpoints/epoch=999-step=10000.ckpt"
+        autoencoder = GAN.load_from_checkpoint(checkpoint)  # Assuming GAN is the class name
+        generator = autoencoder.generator
+        generator.eval()  # Set to evaluation mode
 
+        counter = len(sys.argv) != 2 and int(sys.argv[2]) or 0
+        while counter >= 0:
+            # 2. Prepare the Input Noise
+            latent_dim = autoencoder.hparams.latent_dim  # Get the latent dimension from the loaded model's hparams
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            generator.to(device)
+            noise = torch.randn(1, latent_dim, device=device)  # Create a batch of 1 image
+            # z = torch.randn(real_image.shape[0],self.hparams.latent_dim)
+            # noise = torch.randn([1, 4, 256, 256], latent_dim, device=device)  # Create a batch of 1 image
 
+            # 3. Generate the Image
+            with torch.no_grad():
+                generated_image = generator(noise)
 
-# class CustomImageDataset(Dataset):
-#     def __init__(self, root_dir, img_dir, transform=None, target_transform=None):
-#         self.root_dir = root_dir
-#         self.img_dir = img_dir
-#         self.transform = transform
-#         self.target_transform = target_transform
+            print ("generated_image shape",generated_image.shape,"N", counter)
 
-#     def __len__(self):
-#         return len(os.listdir(os.path.join(self.root_dir, self.img_dir)))
+            now = datetime.datetime.now()
+            time_stamp = now.strftime('%Y-%m-%d_%H-%M-%S')
+            torchvision.utils.save_image(
+                        generated_image,
+                        Path(os.getcwd()) / f"tgt/fake-{time_stamp}-{counter}.png",
+                        padding=2,
+                        normalize=True,
+                    )
+            counter -= 1
 
-#     def __getitem__(self, idx):
-#         img_path = os.path.join(self.root_dir, self.img_dir, os.listdir(os.path.join(self.root_dir, self.img_dir))[idx])
-#         # image = read_image(img_path)
-#         image = iio.v3.imread(img_path)
-#         # len_y = len(image)  # Removed unnecessary variables
-#         # len_x = len(image[0])
-#         # print (img_path, len(image),len(image[0]))  # Removed print statement
-#         if self.transform:
-#             # transform = T.Resize(size = (sc*len_y,sc*len_x))
-#             # image = transform(image)
-#             # n_size = 256//len_y
-#             image = self.transform(image)
-#             # image = F.interpolate(image, size=n_size)
-#         if self.target_transform:
-#             image = self.target_transform(image)
-#         return image
-
-
-    # def train_dataloader(self):
-    #     transform = transforms.Compose([
-    #         transforms.Resize(64),  # Or whatever size your generator expects
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Normalize to [-1, 1]
-    #     ])
-    #     dataset = CustomImageDataset(root_dir=self.hparams.data_dir, img_dir = self.hparams.img_dir, transform=transform)
-    #     return DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
-
-    # def train_dataloader(self):
-    #     transform = transforms.Compose([
-    #         transforms.Resize(256),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5))
-    #     ])
-    #     dataset = datasets.ImageFolder(root=self.hparams.data_dir, transform=transform)
-    #     return DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
-
-
-# class CustomImageDataset(Dataset):
-#     def __init__(self, root_dir, img_dir, transform=None, target_transform=None):
-#         self.root_dir = root_dir
-#         self.img_dir = img_dir
-#         self.transform = transform
-#         self.target_transform = target_transform
-
-#     def __len__(self):
-#         return len(os.listdir(os.path.join(self.root_dir, self.img_dir)))
-
-#     def __getitem__(self, idx):
-#         img_path = os.path.join(self.root_dir, self.img_dir, os.listdir(os.path.join(self.root_dir, self.img_dir))[idx])
-#         # image = read_image(img_path)
-#         image = iio.v3.imread(img_path)
-#         len_y = len(image)
-#         len_x = len(image[0])
-#         print (img_path, len(image),len(image[0]))
-#         if self.transform:
-#             # transform = T.Resize(size = (sc*len_y,sc*len_x))
-#             # image = transform(image)
-#             # n_size = 256//len_y
-#             image = self.transform(image)
-#             # image = F.interpolate(image, size=n_size)
-#         if self.target_transform:
-#             image = self.target_transform(image)
-#         return image
-
-# class GAN_old(L.LightningModule):
-#     def __init__(self, latent_dim=100, lr=0.0002, data_dir='inp'):
-#         super().__init__()
-#         self.save_hyperparameters()
-#         self.generator = Generator(latent_dim=self.hparams.latent_dim)
-#         self.discriminator = Discriminator()
-#         self.validation_z = torch.randn(6, self.hparams.latent_dim)
-#         self.data_dir = data_dir
-
-#     def forward(self, z):
-#         return self.generator(z)
-
-#     def adversarial_loss(self, y_hat, y):
-#         return F.binary_cross_entropy(y_hat, y)
-
-#     def training_step(self, batch, batch_idx, optimizer_idx):
-#         real_images = batch[0]
-#         real_images = real_images.type(torch.float32)
-
-#         # Sample noise
-#         z = torch.randn(real_images.shape[0], self.hparams.latent_dim, device=self.device)
-
-#         # Train Generator
-#         if optimizer_idx == 0:
-#             fake_images = self(z)
-#             y_hat = self.discriminator(fake_images)
-#             y = torch.ones(real_images.size(0), 1, device=self.device)
-#             g_loss = self.adversarial_loss(y_hat, y)
-#             self.log("g_loss", g_loss, prog_bar=True)
-#             return g_loss
-
-#         # Train Discriminator
-#         if optimizer_idx == 1:
-#             # Real images
-#             y_hat_real = self.discriminator(real_images)
-#             y_real = torch.ones(real_images.size(0), 1, device=self.device)
-#             real_loss = self.adversarial_loss(y_hat_real, y_real)
-
-#             # Fake images
-#             fake_images = self(z).detach()
-#             y_hat_fake = self.discriminator(fake_images)
-#             y_fake = torch.zeros(real_images.size(0), 1, device=self.device)
-#             fake_loss = self.adversarial_loss(y_hat_fake, y_fake)
-
-#             d_loss = (real_loss + fake_loss) / 2
-#             self.log("d_loss", d_loss, prog_bar=True)
-#             return d_loss
-
-#     def configure_optimizers(self):
-#         lr = self.hparams.lr
-#         opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(0.5, 0.999))
-#         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
-#         return [opt_g, opt_d], []
-
-#     @property
-#     def automatic_optimization(self) -> bool:
-#         return False
-
-#     def train_dataloader(self):
-#         transform = transforms.Compose([
-#             transforms.Resize(256),
-#             transforms.ToTensor(),
-#             transforms.Normalize((0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5))
-#         ])
-#         dataset = datasets.ImageFolder(root=self.data_dir, transform=transform)
-#         return DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
-
-#     def on_validation_epoch_end(self):
-#         z = self.validation_z.to(self.device)
-#         sample = self(z)
-#         grid = make_grid(sample)
-#         self.logger.experiment.add_image('generated_images', grid, self.current_epoch)
-
+    else:
+        print ("USAGE:")
+        print ("For training:")
+        print(os.path.basename(__file__))
+        print("")
+        print ("For generating")
+        print(os.path.basename(__file__) + " --generate")

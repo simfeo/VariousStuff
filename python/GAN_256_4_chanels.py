@@ -1,4 +1,5 @@
 import pytorch_lightning as L
+from pytorch_lightning.callbacks import ModelCheckpoint
 import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset  # Import Dataset
@@ -115,7 +116,6 @@ class GAN(L.LightningModule):
         #     y = y[:y_hat.size(0)]  # Adjust y to match the size of y_hat
         return F.binary_cross_entropy(y_hat, y)
 
-
     def training_step(self, batch, batch_idx):
         real_images = batch
         real_images = real_images.type(torch.float32)
@@ -174,30 +174,53 @@ class GAN(L.LightningModule):
         return DataLoader(dataset, batch_size=8, shuffle=True, num_workers=2)
         
 
-
     def on_validation_epoch_end(self):
         z = self.validation_z.to(self.device)
         sample = self(z)
         grid = torchvision.utils.make_grid(sample)
         self.logger.experiment.add_image('generated_images', grid, self.current_epoch)
 
+    def on_train_epoch_end(self):
+        # super().on_train_epoch_end()
+        # step = 2
+        # if self.current_epoch > 1 and (self.current_epoch % step) == 0:
+        #     torch.save(self, Path(self.logger.log_dir)/"checkpoints"/f"epoch={self.current_epoch}.ckpt")
+        pass
+
+    def on_save_checkpoint(self, checkpoint):
+        step = 100
+        current_epoch = self.current_epoch + 1
+        if current_epoch > 1 and (current_epoch % step) == 0:
+            torch.save(checkpoint, Path(self.logger.log_dir)/"checkpoints"/f"epoch={self.current_epoch}.ckpt")
+        return super().on_save_checkpoint(checkpoint)
+
+
 
 if __name__ == '__main__':
     # Your main code here
     if len (sys.argv) == 1:
         gan_model = GAN()
-        trainer = L.Trainer()
+
+        # checkpoint_callback = ModelCheckpoint(
+        #     dirpath= 'checkpoints/',  # Directory to save checkpoints
+        #     filename='model-{epoch:02d}-{val_loss:.2f}',  # Filename format
+        #     save_top_k=-1,  # Save all checkpoints
+        #     every_n_epochs=2  # Save every 100 epochs
+        # )
+        # trainer = L.Trainer(max_epochs=1000, callbacks=[checkpoint_callback])
+        trainer = L.Trainer(max_epochs=1000)
         trainer.fit(gan_model)
     elif sys.argv[1] == "--generate":
         print ("genarating")
         # 1. Load the Trained Generator (as you've done)
         checkpoint = "lightning_logs/version_12/checkpoints/epoch=999-step=10000.ckpt"
+        # checkpoint = "lightning_logs/version_24/checkpoints/epoch=2.ckpt"
         autoencoder = GAN.load_from_checkpoint(checkpoint)  # Assuming GAN is the class name
         generator = autoencoder.generator
         generator.eval()  # Set to evaluation mode
 
-        counter = len(sys.argv) != 2 and int(sys.argv[2]) or 0
-        while counter >= 0:
+        counter = len(sys.argv) != 2 and int(sys.argv[2]) or 1
+        while counter > 0:
             # 2. Prepare the Input Noise
             latent_dim = autoencoder.hparams.latent_dim  # Get the latent dimension from the loaded model's hparams
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

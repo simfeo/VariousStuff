@@ -1,5 +1,3 @@
-#simple http server for python without external dependencies and frameworks
-
 import socketserver
 import http.server
 import mimetypes
@@ -42,6 +40,8 @@ class HtmlHandler(http.server.BaseHTTPRequestHandler):
         if os.path.isfile(candidate) and os.path.exists(candidate):
             self.send_response(200)
             self.send_header("Content-type", mimetypes.guess_type(candidate)[0] or "text/plain")
+            self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+            self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
             self.end_headers()
             self.wfile.write(FileMan(candidate).readbinary())
         else:

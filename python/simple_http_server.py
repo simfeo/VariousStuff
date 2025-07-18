@@ -34,7 +34,6 @@ class HtmlHandler(http.server.BaseHTTPRequestHandler):
     def set_cofiguration(cls, html_dir):
         cls.html_dir = html_dir
 
-
     def send_binary_file(self, path):
         candidate = os.path.abspath(os.path.join(self.html_dir, path))
         if os.path.isfile(candidate) and os.path.exists(candidate):
@@ -42,11 +41,11 @@ class HtmlHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-type", mimetypes.guess_type(candidate)[0] or "text/plain")
             self.send_header("Cross-Origin-Opener-Policy", "same-origin")
             self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(FileMan(candidate).readbinary())
         else:
             self.send_response(403)
-
 
     def do_GET(self):
         print (self.path)

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Collections">
+      <UniqueIdentifier>{8a6c3f4b-3e1e-4523-aeb0-39157db2d7af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interfaces">
+      <UniqueIdentifier>{4063d089-74e7-4cfd-9cab-7c0a5f900ace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Includes">
+      <UniqueIdentifier>{128c2609-0ea3-4095-ae03-f57984ab1c78}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\sources\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RingCollection.h">
+      <Filter>Header Files\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="ReadOnlyArray.h">
+      <Filter>Header Files\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSet.h">
+      <Filter>Header Files\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="Pair.h">
+      <Filter>Header Files\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sources\Identifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\sources\Collections\IReadOnlyArray.h">
+      <Filter>Header Files\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IComputer.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IControl.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\Identifier.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IElement.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IGroup.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IHardware.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IParameter.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\ISensor.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\ISettings.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Interfaces\IVisitor.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Include\Identifier.h">
+      <Filter>Header Files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sources\Include\IOControlCode.h">
+      <Filter>Header Files\Includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

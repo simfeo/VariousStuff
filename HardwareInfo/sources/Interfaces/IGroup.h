@@ -2,14 +2,13 @@
 #ifndef IGROUP_H
 #define IGROUP_H
 
+#include <Interfaces/IHardware.h>
+
 #include <string>
 #include <vector>
 
 namespace OpenHardwareMonitor {
     namespace Hardware {
-
-        class IHardware; // Forward declaration of IHardware class or interface
-
         class IGroup {
         public:
             virtual ~IGroup() = default;

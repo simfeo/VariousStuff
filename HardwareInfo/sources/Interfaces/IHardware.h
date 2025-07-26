@@ -2,8 +2,9 @@
 #define IHARDWARE_H
 
 #include "IElement.h"
-#include "IIdentifier.h"
 #include "ISensor.h"
+
+#include <Include/Identifier.h>
 
 #include <string>
 #include <functional>

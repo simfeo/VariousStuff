@@ -2,9 +2,10 @@
 #define ISENSOR_H
 
 #include "IHardware.h"
-#include "IIdentifier.h"
 #include "IParameter.h"
 #include "IControl.h"
+
+#include <Include/Identifier.h>
 
 #include <string>
 #include <vector>
@@ -49,7 +50,7 @@ namespace OpenHardwareMonitor {
         };
 
         // Abstract base class representing the ISensor interface
-        class ISensor {
+        class ISensor : public IElement {
         public:
             virtual ~ISensor() = default;
 

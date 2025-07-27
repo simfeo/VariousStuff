@@ -1,11 +1,12 @@
-#ifndef IPAIR_H
-#define IPAIR_H
+#pragma once
 
 #include <functional> // for std::hash
 #include <cstddef>    // for std::size_t
 
-namespace OpenHardwareMonitor {
-	namespace Collections {
+namespace OpenHardwareMonitor 
+{
+	namespace Collections 
+	{
 		template <typename F, typename S>
 		class Pair {
 		private:
@@ -42,5 +43,3 @@ namespace OpenHardwareMonitor {
 		};
 	} // namespace Collections
 } // namespace OpenHardwareMonitor
-
-#endif

@@ -1,15 +1,16 @@
-
-#ifndef IGROUP_H
-#define IGROUP_H
+#pragma once
 
 #include <Interfaces/IHardware.h>
 
 #include <string>
 #include <vector>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
-        class IGroup {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
+        class IGroup 
+        {
         public:
             virtual ~IGroup() = default;
 
@@ -25,5 +26,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Hardware
 } // namespace OpenHardwareMonitor
-
-#endif // GROUP_H

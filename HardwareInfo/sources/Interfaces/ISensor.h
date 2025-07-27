@@ -1,9 +1,7 @@
-#ifndef ISENSOR_H
-#define ISENSOR_H
+#pragma once
 
-#include "IHardware.h"
-#include "IParameter.h"
-#include "IControl.h"
+#include <Interfaces/IElement.h>
+#include <Interfaces/IControl.h>
 
 #include <Include/Identifier.h>
 
@@ -14,8 +12,10 @@
 #include <chrono>
 #include <optional>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
         // Enum for Sensor types
         enum class SensorType {
@@ -33,6 +33,56 @@ namespace OpenHardwareMonitor {
             SmallData,    // MB = 2^20 Bytes
             Throughput    // MB/s = 2^20 Bytes/s
         };
+
+        static std::string SensorTypeToString(SensorType sesnor)
+        {
+            std::string result = "";
+            switch (sesnor)
+            {
+            case SensorType::Voltage:
+                result = "Voltage";
+                break;
+            case SensorType::Clock:
+                result = "Clock";
+                break;
+            case SensorType::Temperature:
+                result = "Temperature";
+                break;
+            case SensorType::Load:
+                result = "Load";
+                break;
+            case SensorType::Fan:
+                result = "Fan";
+                break;
+            case SensorType::Flow:
+                result = "Flow";
+                break;
+            case SensorType::Control:
+                result = "Control";
+                break;
+            case SensorType::Level:
+                result = "Level";
+                break;
+            case SensorType::Factor:
+                result = "Factor";
+                break;
+            case SensorType::Power:
+                result = "Power";
+                break;
+            case SensorType::Data:
+                result = "Data";
+                break;
+            case SensorType::SmallData:
+                result = "SmallData";
+                break;
+            case SensorType::Throughput:
+                result = "Throughput";
+                break;
+            default:
+                break;
+            }
+            return result;
+        }
 
         // Struct to represent the SensorValue
         struct SensorValue {
@@ -61,7 +111,7 @@ namespace OpenHardwareMonitor {
             virtual SensorType getSensorType() const = 0;
 
             // Getter for Identifier
-            virtual Identifier* getIdentifier() const = 0;
+            virtual Identifier getIdentifier() const = 0;
 
             // Getter and Setter for Name
             virtual std::string getName() const = 0;
@@ -98,5 +148,3 @@ namespace OpenHardwareMonitor {
 
     }  // namespace Hardware
 }  // namespace OpenHardwareMonitor
-
-#endif

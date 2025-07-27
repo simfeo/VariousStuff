@@ -1,11 +1,12 @@
-#ifndef IDENTIFIER_H
-#define IDENTIFIER_H
+#pragma once
 
 #include <string>
 #include <vector>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor
+{
+    namespace Hardware
+    {
 
         class Identifier {
         private:
@@ -41,5 +42,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Hardware
 } // namespace OpenHardwareMonitor
-
-#endif // !IDENTIFIER_H

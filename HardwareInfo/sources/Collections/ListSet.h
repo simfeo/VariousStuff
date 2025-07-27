@@ -1,12 +1,13 @@
-#ifndef LISTSET_H
-#define LISTSET_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
 
-namespace OpenHardwareMonitor {
-    namespace Collections {
+namespace OpenHardwareMonitor 
+{
+    namespace Collections 
+    {
 
         template <typename T>
         class ListSet {
@@ -84,5 +85,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Collections
 } // namespace OpenHardwareMonitor
-
-#endif // LISTSET_H

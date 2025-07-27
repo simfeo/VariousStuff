@@ -1,20 +1,23 @@
-#ifndef GENERICRAM_H
-#define GENERICRAM_H
+#pragma once
 
-#include <Interfaces/IHardware.h>
 #include <Include/Hardware.h>
+#include <Include/Sensor.h>
 
 #include <string>
 #include <Windows.h>
 
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
-        namespace RAM {
-            class GenericRAM : public Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
+        namespace RAM 
+        {
+            class GenericRAM : public Hardware 
+            {
             public:
                 // Constructor
-                GenericRAM(const std::string& name);
+                GenericRAM(const std::string& name, ISettings* settings);
 
                 // Destructor
                 virtual ~GenericRAM();
@@ -39,5 +42,3 @@ namespace OpenHardwareMonitor {
         }
     }
 }
-
-#endif // GENERICRAM_H

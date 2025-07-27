@@ -1,44 +1,15 @@
-#ifndef SMBIOS_H
-#define SMBIOS_H
+#pragma once
 
 #include <stdint.h>
 #include <string>
 #include <vector>
 #include <memory>
+#include <sstream>
 
-namespace OpenHardwareMonitor {
-	namespace Hardware {
-
-		class SMBIOS {
-		public:
-			SMBIOS();
-			std::string GetReport() const;
-
-			const BIOSInformation* BIOS();
-			const SystemInformation* System();
-			const BaseBoardInformation* Board();
-			const ProcessorInformation* Processor();
-			const std::vector<std::shared_ptr<MemoryDevice>> MemoryDevices();
-
-		private:
-			// this is for UNIX
-			// static std::string ReadSysFS(const std::string& path);
-
-			std::vector<byte> raw	{};
-			std::vector<std::shared_ptr<Structure>> table	{};
-			std::vector<std::shared_ptr<MemoryDevice>> memoryDevices {};
-
-			std::shared_ptr<Version>				version				{ nullptr };
-			std::shared_ptr<BIOSInformation>		biosInformation		{ nullptr };
-			std::shared_ptr<SystemInformation>		systemInformation	{ nullptr };
-			std::shared_ptr<BaseBoardInformation>	baseBoardInformation { nullptr };
-			std::shared_ptr<ProcessorInformation>	processorInformation { nullptr };
-
-			void ProcessRawSMBios();
-			void GetRawData();
-			void FillStructs();
-		};
-
+namespace OpenHardwareMonitor 
+{
+	namespace Hardware 
+	{
 		class Version {
 		public:
 			Version(int major, int minor) : major_(major), minor_(minor) {}
@@ -159,7 +130,35 @@ namespace OpenHardwareMonitor {
 			const std::string GetPartNumber() const;
 			const int GetSpeed() const;
 		};
+
+		class SMBIOS {
+		public:
+			SMBIOS();
+			std::string GetReport() const;
+
+			const BIOSInformation* BIOS();
+			const SystemInformation* System();
+			const BaseBoardInformation* Board();
+			const ProcessorInformation* Processor();
+			const std::vector<std::shared_ptr<MemoryDevice>> MemoryDevices();
+
+		private:
+			// this is for UNIX
+			// static std::string ReadSysFS(const std::string& path);
+
+			std::vector<unsigned char> raw{};
+			std::vector<std::shared_ptr<Structure>> table{};
+			std::vector<std::shared_ptr<MemoryDevice>> memoryDevices{};
+
+			std::shared_ptr<Version>				version{ nullptr };
+			std::shared_ptr<BIOSInformation>		biosInformation{ nullptr };
+			std::shared_ptr<SystemInformation>		systemInformation{ nullptr };
+			std::shared_ptr<BaseBoardInformation>	baseBoardInformation{ nullptr };
+			std::shared_ptr<ProcessorInformation>	processorInformation{ nullptr };
+
+			void ProcessRawSMBios();
+			void GetRawData();
+			void FillStructs();
+		};
 	}
 }
-
-#endif

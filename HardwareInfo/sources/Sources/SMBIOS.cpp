@@ -13,13 +13,21 @@
 #pragma comment(lib, "wbemuuid.lib")
 
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware
+    {
 
         // Constructor
-        SMBIOS::SMBIOS() : version(nullptr), biosInformation(nullptr), systemInformation(nullptr), baseBoardInformation(nullptr), processorInformation(nullptr) {
+        SMBIOS::SMBIOS()
+            : version(nullptr)
+            , biosInformation(nullptr)
+            , systemInformation(nullptr)
+            , baseBoardInformation(nullptr)
+            , processorInformation(nullptr)
+        {
 #ifdef __unix__
-//later
+            //later
 #else
             ProcessRawSMBios();
 #endif
@@ -161,7 +169,7 @@ namespace OpenHardwareMonitor {
 
             if (raw.size()) {
                 int offset = 0;
-                byte type = raw[offset];
+                unsigned char type = raw[offset];
                 while (offset + 4 < raw.size() && type != 127) {
 
                     type = raw[offset];
@@ -170,13 +178,14 @@ namespace OpenHardwareMonitor {
 
                     if (offset + length > raw.size())
                         break;
-                    std::vector<byte> data (length);
+                    std::vector<unsigned char> data(length);
 
                     auto iter_first = raw.begin();
                     auto iter_last = raw.begin();
                     std::advance(iter_first, offset);
-                    std::advance(iter_last, offset+length);
-                    
+                    std::advance(iter_last, offset + length);
+                    std::copy(iter_first, iter_last, data.begin());
+
                     offset += length;
 
                     std::vector<std::string> stringsList{};
@@ -186,33 +195,33 @@ namespace OpenHardwareMonitor {
                     while (offset < raw.size() && raw[offset] != 0) {
                         std::stringstream sb{};
                         while (offset < raw.size() && raw[offset] != 0) {
-                            sb<<(char)raw[offset];
+                            sb << (char)raw[offset];
                             offset++;
                         }
                         offset++;
                         stringsList.emplace_back(std::move(sb.str()));
                     }
                     offset++;
-                    switch (type) 
+                    switch (type)
                     {
                     case 0x00:
-                        biosInformation.reset( new BIOSInformation(
-                            type, handle, data, stringsList) );
+                        biosInformation.reset(new BIOSInformation(
+                            type, handle, data, stringsList));
                         structureList.push_back(biosInformation);
                         break;
                     case 0x01:
-                        systemInformation.reset( new SystemInformation(
-                            type, handle, data, stringsList) );
+                        systemInformation.reset(new SystemInformation(
+                            type, handle, data, stringsList));
                         structureList.push_back(systemInformation);
                         break;
                     case 0x02:
                         baseBoardInformation.reset(new BaseBoardInformation(
-                        type, handle, data, stringsList));
+                            type, handle, data, stringsList));
                         structureList.push_back(baseBoardInformation);
                         break;
                     case 0x04:
                         processorInformation.reset(new ProcessorInformation(
-                        type, handle, data, stringsList));
+                            type, handle, data, stringsList));
                         structureList.push_back(processorInformation);
                         break;
                     case 0x11:
@@ -220,7 +229,7 @@ namespace OpenHardwareMonitor {
                             std::shared_ptr<MemoryDevice>(
                                 new MemoryDevice(
                                     type, handle, data, stringsList)));
-                        structureList.push_back(memoryDeviceList[memoryDeviceList.size()-1]);
+                        structureList.push_back(memoryDeviceList[memoryDeviceList.size() - 1]);
                         break;
                     default:
                         structureList.push_back(std::shared_ptr<Structure>(new Structure(
@@ -242,24 +251,24 @@ namespace OpenHardwareMonitor {
                 report << "SMBIOS Version: " << version->ToString(2) << std::endl;
             }
 
-            if (BIOS != nullptr) {
+            if (biosInformation != nullptr) {
                 report << "BIOS Vendor: " << biosInformation->GetVendor() << std::endl;
                 report << "BIOS Version: " << biosInformation->GetVersion() << std::endl;
             }
 
-            if (System != nullptr) {
+            if (systemInformation != nullptr) {
                 report << "System Manufacturer: " << systemInformation->GetManufacturerName() << std::endl;
                 report << "System Name: " << systemInformation->GetProductName() << std::endl;
                 report << "System Version: " << systemInformation->GetVersion() << std::endl;
             }
 
-            if (Board != nullptr) {
+            if (baseBoardInformation != nullptr) {
                 report << "Mainboard Manufacturer: " << baseBoardInformation->GetManufacturerName() << std::endl;
                 report << "Mainboard Name: " << baseBoardInformation->GetProductName() << std::endl;
                 report << "Mainboard Version: " << baseBoardInformation->GetVersion() << std::endl;
             }
 
-            if (Processor != nullptr) {
+            if (processorInformation != nullptr) {
                 report << "Processor Manufacturer: " << processorInformation->GetManufacturerName() << std::endl;
                 report << "Processor Version: " << processorInformation->GetVersion() << std::endl;
             }
@@ -273,7 +282,7 @@ namespace OpenHardwareMonitor {
             // Add raw SMBios table if available
             if (!raw.empty()) {
                 report << "SMBIOS Table" << std::endl;
-                std::string base64 = "SMBIOS Base64 Representation"; // Placeholder for actual base64 encoding
+                std::string base64 = OHM_H::ToBase64STring(raw); // Placeholder for actual base64 encoding
                 for (size_t i = 0; i < std::ceil(base64.length() / 64.0); ++i) {
                     report << " ";
                     for (size_t j = 0; j < 0x40; ++j) {
@@ -408,16 +417,6 @@ namespace OpenHardwareMonitor {
             return serialNumber;
         }
 
-        const std::string MemoryDevice::GetPartNumber() const
-        {
-            return partNumber;
-        }
-
-        const int MemoryDevice::GetSpeed() const
-        {
-            return speed;
-        }
-
         const std::string SystemInformation::GetFamily() const {
             return family;
         }
@@ -512,6 +511,22 @@ namespace OpenHardwareMonitor {
             return bankLocator;
         }
 
+        const std::string MemoryDevice::GetManufacturerName() const {
+            return manufacturerName;
+        }
 
+        const std::string MemoryDevice::GetSerialNumber() const
+        {
+            return serialNumber;
+        }
+        const std::string MemoryDevice::GetPartNumber() const
+        {
+            return partNumber;
+        }
+
+        const int MemoryDevice::GetSpeed() const
+        {
+            return speed;
+        }
     }
 }

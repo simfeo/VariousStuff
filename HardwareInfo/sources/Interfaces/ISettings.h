@@ -1,12 +1,14 @@
-#ifndef ISETTINGS_H
-#define ISETTINGS_H
+#pragma once
 
 #include <string>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
-        class ISettings {
+        class ISettings 
+        {
         public:
             virtual ~ISettings() = default;
 
@@ -18,5 +20,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Hardware
 } // namespace OpenHardwareMonitor
-
-#endif // ISETTINGS_H

@@ -1,10 +1,11 @@
-#ifndef ICONTROL_H
-#define ICONTROL_H
+#pragma once
 
-#include "IIdentifier.h"
+#include <Include/Identifier.h>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
         // Enum for Control Modes
         enum class ControlMode {
@@ -42,4 +43,3 @@ namespace OpenHardwareMonitor {
 
     }  // namespace Hardware
 }  // namespace OpenHardwareMonitor
-#endif // !ICONTROL_H

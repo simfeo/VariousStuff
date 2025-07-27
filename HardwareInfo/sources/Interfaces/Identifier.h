@@ -1,15 +1,18 @@
-#ifndef IDENTIFIER_H
-#define IDENTIFIER_H
+#pragma once
+
 #include <string>
 #include <vector>
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
 
-namespace OpenHardwareMonitor {
-	namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+	namespace Hardware 
+	{
 
-		class Identifier {
+		class Identifier 
+		{
 		private:
 			std::string identifier;
 			static constexpr char Separator = '/';
@@ -84,5 +87,3 @@ namespace OpenHardwareMonitor {
 	}
 }
 
-
-#endif // !IDENTIFIER_H

@@ -1,15 +1,17 @@
-#ifndef RINGCOLLECTION_H
-#define RINGCOLLECTION_H
+#pragma once
 
 #include <vector>
 #include <stdexcept>
 #include <iterator>
 
-namespace OpenHardwareMonitor {
-    namespace Collections {
+namespace OpenHardwareMonitor 
+{
+    namespace Collections 
+    {
 
         template <typename T>
-        class RingCollection {
+        class RingCollection 
+        {
         private:
             std::vector<T> array;
             int head;
@@ -189,5 +191,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Collections
 } // namespace OpenHardwareMonitor
-
-#endif // RINGCOLLECTION_H

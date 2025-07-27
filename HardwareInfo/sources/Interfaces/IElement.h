@@ -1,11 +1,11 @@
-#ifndef IELEMENT_H
-#define IELEMENT_H
+#pragma once
 
-#include "IVisitor.h"
+#include <Interfaces/IVisitor.h>
 
 namespace OpenHardwareMonitor
 {
-	namespace  Hardware {
+	namespace Hardware
+	{
 
 		class IElement {
 		public:
@@ -19,4 +19,3 @@ namespace OpenHardwareMonitor
 		};
 	}
 }
-#endif

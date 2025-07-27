@@ -1,5 +1,4 @@
-#ifndef RAMGROUP_H
-#define RAMGROUP_H
+#pragma once
 
 #include <Include/Hardware.h>
 #include <Include/SMBIOS.h>
@@ -9,12 +8,16 @@
 #include <vector>
 #include <string>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
-        namespace RAM {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
+        namespace RAM 
+        {
 
             // RAMGroup class
-            class RAMGroup :public IGroup {
+            class RAMGroup :public IGroup 
+            {
             private:
                 std::vector<Hardware*> hardware;
 
@@ -31,5 +34,3 @@ namespace OpenHardwareMonitor {
         }  // namespace RAM
     }  // namespace Hardware
 }  // namespace OpenHardwareMonitor
-
-#endif // RAMGROUP_H

@@ -1,16 +1,17 @@
-#ifndef ICOMPUTER_H
-#define ICOMPUTER_H
+#pragma once
 
-#include "IHardware.h"
-#include "IElement.h"
+#include <Interfaces/IElement.h>
 
 #include <string>
 #include <vector>
 #include <memory>
 #include <functional>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
         // Define the type for HardwareEventHandler delegate as a function type
         using HardwareEventHandler = std::function<void(IHardware*)>;
@@ -51,5 +52,3 @@ namespace OpenHardwareMonitor {
 
     }  // namespace Hardware
 }  // namespace OpenHardwareMonitor
-
-#endif // !ICOMPUTER_H

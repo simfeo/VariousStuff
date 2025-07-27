@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c2e06871-55cb-4b72-b36f-82caa9f407b8}</ProjectGuid>
-    <RootNamespace>PortingWin</RootNamespace>
+    <ProjectGuid>{f54c08a1-14de-4750-9f4c-bebf64c6f0a6}</ProjectGuid>
+    <RootNamespace>Hardware</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -76,6 +76,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +92,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,6 +106,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,6 +122,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,27 +131,40 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\sources\Identifier.cpp" />
-    <ClCompile Include="..\sources\main.cpp" />
-    <ClCompile Include="Pair.h" />
-    <ClCompile Include="ListSet.h" />
-    <ClCompile Include="ReadOnlyArray.h" />
-    <ClCompile Include="RingCollection.h" />
+    <ClCompile Include="HelpersCommon.cpp" />
+    <ClCompile Include="Sources\GenericRam.cpp" />
+    <ClCompile Include="Sources\Hardware.cpp" />
+    <ClCompile Include="Sources\Identifier.cpp" />
+    <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\RamGroup.cpp" />
+    <ClCompile Include="Sources\Sensor.cpp" />
+    <ClCompile Include="Sources\SMBIOS.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\sources\Collections\IReadOnlyArray.h" />
-    <ClInclude Include="..\sources\Include\Identifier.h" />
-    <ClInclude Include="..\sources\Include\IOControlCode.h" />
-    <ClInclude Include="..\sources\Interfaces\IComputer.h" />
-    <ClInclude Include="..\sources\Interfaces\IControl.h" />
-    <ClInclude Include="..\sources\Interfaces\Identifier.h" />
-    <ClInclude Include="..\sources\Interfaces\IElement.h" />
-    <ClInclude Include="..\sources\Interfaces\IGroup.h" />
-    <ClInclude Include="..\sources\Interfaces\IHardware.h" />
-    <ClInclude Include="..\sources\Interfaces\IParameter.h" />
-    <ClInclude Include="..\sources\Interfaces\ISensor.h" />
-    <ClInclude Include="..\sources\Interfaces\ISettings.h" />
-    <ClInclude Include="..\sources\Interfaces\IVisitor.h" />
+    <ClInclude Include="Collections\IReadOnlyArray.h" />
+    <ClInclude Include="Collections\ListSet.h" />
+    <ClInclude Include="Collections\Pair.h" />
+    <ClInclude Include="Collections\ReadOnlyArray.h" />
+    <ClInclude Include="Collections\RingCollection.h" />
+    <ClInclude Include="Include\GenericRam.h" />
+    <ClInclude Include="Include\Hardware.h" />
+    <ClInclude Include="Include\HelpersCommon.h" />
+    <ClInclude Include="Include\Identifier.h" />
+    <ClInclude Include="Include\IOControlCode.h" />
+    <ClInclude Include="Include\RAMGroup.h" />
+    <ClInclude Include="Include\Sensor.h" />
+    <ClInclude Include="Include\SMBIOS.h" />
+    <ClInclude Include="Interfaces\Delegate.h" />
+    <ClInclude Include="Interfaces\IComputer.h" />
+    <ClInclude Include="Interfaces\IControl.h" />
+    <ClInclude Include="Interfaces\Identifier.h" />
+    <ClInclude Include="Interfaces\IElement.h" />
+    <ClInclude Include="Interfaces\IGroup.h" />
+    <ClInclude Include="Interfaces\IHardware.h" />
+    <ClInclude Include="Interfaces\IParameter.h" />
+    <ClInclude Include="Interfaces\ISensor.h" />
+    <ClInclude Include="Interfaces\ISettings.h" />
+    <ClInclude Include="Interfaces\IVisitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

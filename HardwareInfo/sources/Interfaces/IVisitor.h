@@ -1,15 +1,16 @@
-#ifndef IVISITOR_H
-#define IVISITOR_H
+#pragma once
 
-#include "IComputer.h"
-#include "IHardware.h"
-#include "IParameter.h"
-#include "ISensor.h"
+namespace OpenHardwareMonitor 
+{
+	namespace Hardware 
+	{
+		class IComputer;
+		class IHardware;
+		class ISensor;
+		class IParameter;
 
-namespace OpenHardwareMonitor {
-	namespace Hardware {
-
-		class IVisitor {
+		class IVisitor 
+		{
 		public:
 			virtual ~IVisitor() = default;
 
@@ -21,4 +22,3 @@ namespace OpenHardwareMonitor {
 
 	} // namespace Hardware
 } // namespace OpenHardwareMonitor
-#endif

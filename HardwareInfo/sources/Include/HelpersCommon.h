@@ -1,28 +1,15 @@
-#ifndef HELPERSCOMMON_H
-#define HELPERSCOMMON_H
+#pragma once
 
 #include <string>
+#include <vector>
 
 namespace OHM_H
 {
-    std::string TrimString(const std::string& inStr)
-    {
-        if (!inStr.length())
-        {
-            return "";
-        }
-        size_t num = inStr.length() - 1;
-        size_t i = 0;
+    std::string TrimString(const std::string& inStr);
 
-        for (i = 0; i < inStr.length() && (std::isspace(inStr.at(i))); i++)
-        {
-        }
+    std::string ToLowerString(std::string s);
 
-        while (num >= i && (std::isspace(inStr.at(num))))
-        {
-            num--;
-        }
-        return inStr.substr(i, num - i);
-    }
+    std::string ToBase64STring(const std::vector<unsigned char>& data, bool insertLineBreaks = false);
+
+    std::vector<std::string> SplitString(const std::string& fieldName, char delimiter, bool ignoreEmpty = true);
 }
-#endif // !HELPERSCOMMON_H

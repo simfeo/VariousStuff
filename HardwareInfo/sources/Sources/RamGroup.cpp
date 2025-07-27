@@ -2,16 +2,19 @@
 #include <Include/GenericRam.h>
 #include <iostream>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
-        namespace RAM {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
+        namespace RAM 
+        {
             // RAMGroup class implementation
             RAMGroup::RAMGroup(SMBIOS* smbios, ISettings* settings) {
                 // No implementation for RAM on Unix systems
 #ifdef __unix__
                 hardware.clear();
 #else
-                hardware.push_back(new GenericRAM("Generic Memory"));
+                hardware.push_back(new GenericRAM("Generic Memory", settings));
 #endif
             }
 

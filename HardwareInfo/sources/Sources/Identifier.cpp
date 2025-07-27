@@ -3,8 +3,10 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
         // Helper: Validates identifier parts
         void Identifier::CheckIdentifiers(const std::vector<std::string>& identifiers) {

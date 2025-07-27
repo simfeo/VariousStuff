@@ -19,26 +19,26 @@ namespace OpenHardwareMonitor {
 
 		void Hardware::ActivateSensor(ISensor* sensor) {
 			active.push_back(sensor);
-			if (SensorAdded) {
-				SensorAdded(sensor);
-			}
+
+			SensorRemoved(sensor);
 		}
 
 		void Hardware::DeactivateSensor(ISensor* sensor) {
 			auto it = std::find(active.begin(), active.end(), sensor);
 			if (it != active.end()) {
 				active.erase(it);
-				if (SensorRemoved) {
-					SensorRemoved(sensor);
-				}
+
+				SensorRemoved(sensor);
 			}
 		}
 
-		std::string Hardware::Name() const {
+		const std::string& Hardware::GetName() const
+		{
 			return customName;
 		}
 
-		void Hardware::Name(const std::string& value) {
+		void Hardware::SetName(const std::string& value)
+		{
 			if (!value.empty()) {
 				customName = value;
 			}
@@ -48,14 +48,39 @@ namespace OpenHardwareMonitor {
 			settings->SetValue(Identifier(identifier, { "name" }).ToString(), customName);
 		}
 
-		const Identifier& Hardware::GetIdentifier() const {
+
+		const Identifier Hardware::GetIdentifier() const {
 			return identifier;
 		}
 
+		void Hardware::AddSensorAddedHandler(const SensorEventHandler& handler)
+		{
+			SensorAdded += handler;
+		}
+
+		void Hardware::RemoveSensorAddedHandler(const SensorEventHandler& handler)
+		{
+			SensorAdded -= handler;
+		}
+
+		void Hardware::AddSensorRemovedHandler(const SensorEventHandler& handler)
+		{
+			SensorRemoved += handler;
+		}
+
+		void Hardware::RemoveSensorRemovedHandler(const SensorEventHandler& handler)
+		{
+			SensorRemoved -= handler;
+		}
+
+		void Hardware::AddClosingHandler(const std::function<void(Hardware*)>& handler)
+		{
+			Closing += handler;
+		}
+
 		void Hardware::Close() {
-			if (Closing) {
-				Closing(this);
-			}
+			Closing(this);
+			
 		}
 
 		void Hardware::Accept(const IVisitor* visitor) {

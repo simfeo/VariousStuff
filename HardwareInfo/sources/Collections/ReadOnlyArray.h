@@ -1,13 +1,14 @@
-#ifndef READONLYARRAY_H
-#define READONLYARRAY_H
+#pragma once
 
 #include <vector>
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
 
-namespace OpenHardwareMonitor {
-    namespace Collections {
+namespace OpenHardwareMonitor 
+{
+    namespace Collections 
+    {
 
         template <typename T>
         class ReadOnlyArray {
@@ -73,5 +74,3 @@ namespace OpenHardwareMonitor {
 
     } // namespace Collections
 } // namespace OpenHardwareMonitor
-
-#endif // READONLYARRAY_H

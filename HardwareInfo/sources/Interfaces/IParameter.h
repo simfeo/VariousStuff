@@ -1,16 +1,17 @@
-#ifndef IPARAMETER_H
-#define IPARAMETER_H
+#pragma once
 
-#include "ISensor.h"
+#include <Interfaces/ISensor.h>
 #include <Include/Identifier.h>
 
 #include <string>
 
-namespace OpenHardwareMonitor {
-    namespace Hardware {
+namespace OpenHardwareMonitor 
+{
+    namespace Hardware 
+    {
 
         // Abstract base class to act like an interface.
-        class IParameter {
+        class IParameter : public IElement {
         public:
             virtual ~IParameter() = default;
 
@@ -40,5 +41,3 @@ namespace OpenHardwareMonitor {
 
     }  // namespace Hardware
 }  // namespace OpenHardwareMonitor
-
-#endif // !IPARAMETER_H

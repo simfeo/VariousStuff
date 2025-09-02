@@ -51,6 +51,9 @@
     <ClCompile Include="Sources\OperatingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\GroupAffinity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\GenericRam.h">
@@ -126,6 +129,9 @@
       <Filter>Header Files\Collections</Filter>
     </ClInclude>
     <ClInclude Include="Include\OperatingSystem.h">
+      <Filter>Header Files\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\GroupAffinity.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
   </ItemGroup>

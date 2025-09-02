@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="HelpersCommon.cpp" />
     <ClCompile Include="Sources\GenericRam.cpp" />
+    <ClCompile Include="Sources\GroupAffinity.cpp" />
     <ClCompile Include="Sources\Hardware.cpp" />
     <ClCompile Include="Sources\Identifier.cpp" />
     <ClCompile Include="Sources\main.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Collections\ReadOnlyArray.h" />
     <ClInclude Include="Collections\RingCollection.h" />
     <ClInclude Include="Include\GenericRam.h" />
+    <ClInclude Include="Include\GroupAffinity.h" />
     <ClInclude Include="Include\Hardware.h" />
     <ClInclude Include="Include\HelpersCommon.h" />
     <ClInclude Include="Include\Identifier.h" />

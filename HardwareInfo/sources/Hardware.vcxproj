@@ -136,6 +136,7 @@
     <ClCompile Include="Sources\Hardware.cpp" />
     <ClCompile Include="Sources\Identifier.cpp" />
     <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\OperatingSystem.cpp" />
     <ClCompile Include="Sources\RamGroup.cpp" />
     <ClCompile Include="Sources\Sensor.cpp" />
     <ClCompile Include="Sources\SMBIOS.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Include\HelpersCommon.h" />
     <ClInclude Include="Include\Identifier.h" />
     <ClInclude Include="Include\IOControlCode.h" />
+    <ClInclude Include="Include\OperatingSystem.h" />
     <ClInclude Include="Include\RAMGroup.h" />
     <ClInclude Include="Include\Sensor.h" />
     <ClInclude Include="Include\SMBIOS.h" />

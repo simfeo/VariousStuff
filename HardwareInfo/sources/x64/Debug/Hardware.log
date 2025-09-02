@@ -1,5 +1,0 @@
-﻿  HelpersCommon.cpp
-D:\Sandbox\VariousStuff\HardwareInfo\sources\HelpersCommon.cpp(129,16): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-  Sensor.cpp
-  Generating Code...
-  Hardware.vcxproj -> D:\Sandbox\VariousStuff\HardwareInfo\x64\Debug\Hardware.exe

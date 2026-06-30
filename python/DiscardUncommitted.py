@@ -91,10 +91,10 @@ def build_parser() -> argparse.ArgumentParser:
 		formatter_class=argparse.RawDescriptionHelpFormatter,
 		epilog=(
 			"Examples:\n"
-			"  python utils/git/DiscardUncommitted.py\n"
-			"  python utils/git/DiscardUncommitted.py --untracked\n"
-			"  python utils/git/DiscardUncommitted.py --tracked --submodules\n"
-			"  python utils/git/DiscardUncommitted.py --dry-run"
+			"  python DiscardUncommitted.py\n"
+			"  python DiscardUncommitted.py --untracked\n"
+			"  python DiscardUncommitted.py --tracked --submodules\n"
+			"  python DiscardUncommitted.py --dry-run"
 		),
 	)
 	parser.add_argument(

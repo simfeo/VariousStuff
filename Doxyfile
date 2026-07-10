@@ -1,0 +1,14 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "Fancy argparser"
+PROJECT_BRIEF          = "Single file argument parser for c++"
+GENERATE_TREEVIEW      = YES
+INPUT                  = /Users/idimus/Sandbox/FancyArgumentParser/argparse.h
+FULL_PATH_NAMES        = NO
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+JAVADOC_AUTOBRIEF      = YES
+GENERATE_LATEX         = NO
+SOURCE_BROWSER         = YES
+HAVE_DOT               = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO

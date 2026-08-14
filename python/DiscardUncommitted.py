@@ -37,6 +37,19 @@ def run_git(cwd: Path, args: list[str], *, dry_run: bool = False) -> None:
 		raise subprocess.CalledProcessError(result.returncode, command)
 
 
+def capture_git(cwd: Path, args: list[str]) -> str:
+	result = subprocess.run(
+		["git", *args],
+		cwd=cwd,
+		text=True,
+		capture_output=True,
+		encoding=SUBPROCESS_TEXT_ENCODING,
+		errors="replace",
+		check=False,
+	)
+	return result.stdout or ""
+
+
 def find_repo_root(start_path: Path) -> Path:
 	result = subprocess.run(
 		["git", "rev-parse", "--show-toplevel"],
@@ -68,21 +81,39 @@ def discard_tracked(repo_root: Path, *, dry_run: bool) -> None:
 	run_git(repo_root, ["reset", "--hard", "HEAD"], dry_run=False)
 
 
-def discard_submodules(repo_root: Path, *, dry_run: bool) -> None:
+def discard_submodules(repo_root: Path, *, dry_run: bool, deep: bool = False) -> None:
+	# Deep mode also drops ignored files and nested repositories, which plain -fd keeps.
+	clean_flags = "-ffdx" if deep else "-fd"
+	steps: list[list[str]] = []
+	if deep:
+		steps.append(["submodule", "sync", "--recursive"])
+	steps.append(["submodule", "update", "--init", "--recursive", "--force"])
+	steps.append(["submodule", "foreach", "--recursive", "git", "reset", "--hard", "HEAD"])
+	steps.append(["submodule", "foreach", "--recursive", "git", "clean", clean_flags])
+	if deep:
+		steps.append(["submodule", "update", "--init", "--recursive", "--force"])
 	if dry_run:
 		run_git(repo_root, ["submodule", "status", "--recursive"], dry_run=False)
-		print("[dry-run] git submodule update --init --recursive --force")
-		print("[dry-run] git submodule foreach --recursive git reset --hard HEAD")
-		print("[dry-run] git submodule foreach --recursive git clean -fd")
+		for step in steps:
+			print(f"[dry-run] git {' '.join(step)}")
 		return
-	run_git(repo_root, ["submodule", "update", "--init", "--recursive", "--force"], dry_run=False)
-	run_git(
-		repo_root,
-		["submodule", "foreach", "--recursive", "git", "reset", "--hard", "HEAD"],
-		dry_run=False,
-	)
-	clean_args = ["submodule", "foreach", "--recursive", "git", "clean", "-fd"]
-	run_git(repo_root, clean_args, dry_run=False)
+	for step in steps:
+		run_git(repo_root, step, dry_run=False)
+
+
+def verify_submodules_pristine(repo_root: Path) -> bool:
+	dirty = [
+		line
+		for line in capture_git(repo_root, ["status", "--porcelain"]).splitlines()
+		if line.strip()
+	]
+	if not dirty:
+		print("Submodules are pristine.")
+		return True
+	print("Still reported by git status:", file=sys.stderr)
+	for line in dirty:
+		print(f"  {line}", file=sys.stderr)
+	return False
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -91,10 +122,11 @@ def build_parser() -> argparse.ArgumentParser:
 		formatter_class=argparse.RawDescriptionHelpFormatter,
 		epilog=(
 			"Examples:\n"
-			"  python DiscardUncommitted.py\n"
-			"  python DiscardUncommitted.py --untracked\n"
-			"  python DiscardUncommitted.py --tracked --submodules\n"
-			"  python DiscardUncommitted.py --dry-run"
+			"  python utils/git/DiscardUncommitted.py\n"
+			"  python utils/git/DiscardUncommitted.py --untracked\n"
+			"  python utils/git/DiscardUncommitted.py --tracked --submodules\n"
+			"  python utils/git/DiscardUncommitted.py --deep-submodules\n"
+			"  python utils/git/DiscardUncommitted.py --dry-run"
 		),
 	)
 	parser.add_argument(
@@ -116,6 +148,16 @@ def build_parser() -> argparse.ArgumentParser:
 		help="Discard changes in submodules (checkout, reset, clean inside submodules).",
 	)
 	parser.add_argument(
+		"-d",
+		"--deep-submodules",
+		action="store_true",
+		help=(
+			"Restore nested repositories to a pristine state: also removes ignored files "
+			"and nested repositories inside submodules (git clean -ffdx). Implies --submodules. "
+			"Disabled by default because it deletes build artifacts and other ignored files."
+		),
+	)
+	parser.add_argument(
 		"-C",
 		"--directory",
 		type=Path,
@@ -134,11 +176,11 @@ def main() -> int:
 	configure_stdio()
 	parser = build_parser()
 	args = parser.parse_args()
-	selected = args.untracked or args.tracked or args.submodules
+	selected = args.untracked or args.tracked or args.submodules or args.deep_submodules
 	# No flags means all operations; explicit flags select a subset.
 	do_untracked = args.untracked or not selected
 	do_tracked = args.tracked or not selected
-	do_submodules = args.submodules or not selected
+	do_submodules = args.submodules or args.deep_submodules or not selected
 	try:
 		repo_root = find_repo_root(args.directory.resolve())
 	except RuntimeError as error:
@@ -152,14 +194,21 @@ def main() -> int:
 			print("=== Discard tracked file changes ===")
 			discard_tracked(repo_root, dry_run=args.dry_run)
 		if do_submodules:
-			print("=== Discard submodule changes ===")
-			discard_submodules(repo_root, dry_run=args.dry_run)
+			if args.deep_submodules:
+				print("=== Discard submodule changes (deep: ignored files and nested repos too) ===")
+			else:
+				print("=== Discard submodule changes ===")
+			discard_submodules(repo_root, dry_run=args.dry_run, deep=args.deep_submodules)
 		if do_untracked:
 			print("=== Remove untracked files ===")
 			discard_untracked(repo_root, dry_run=args.dry_run)
 	except subprocess.CalledProcessError as error:
 		print(f"Command failed ({error.returncode}): {' '.join(error.cmd)}", file=sys.stderr)
 		return error.returncode or 1
+	if args.deep_submodules and not args.dry_run:
+		print("=== Verify ===")
+		if not verify_submodules_pristine(repo_root):
+			return 1
 	print("Done.")
 	return 0
 

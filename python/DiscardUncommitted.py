@@ -12,9 +12,11 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from collections import deque
 from pathlib import Path
 
 SUBPROCESS_TEXT_ENCODING = "utf-8"
+STDERR_TAIL_LINES = 20
 
 
 def configure_stdio() -> None:
@@ -31,15 +33,33 @@ def run_git(cwd: Path, args: list[str], *, dry_run: bool = False) -> None:
 	if dry_run:
 		print(f"[dry-run] {label}")
 		return
-	print(label)
-	result = subprocess.run(command, cwd=cwd)
-	if result.returncode != 0:
-		raise subprocess.CalledProcessError(result.returncode, command)
+	print(label, flush=True)
+	# Mirror stderr to the console and keep a copy: git prints the failure reason there,
+	# and it is needed in the error message because the console may be scrolled away by then.
+	process = subprocess.Popen(
+		command,
+		cwd=cwd,
+		stderr=subprocess.PIPE,
+		text=True,
+		encoding=SUBPROCESS_TEXT_ENCODING,
+		errors="replace",
+	)
+	tail: deque[str] = deque(maxlen=STDERR_TAIL_LINES)
+	if process.stderr is not None:
+		for line in process.stderr:
+			sys.stderr.write(line)
+			sys.stderr.flush()
+			if line.strip():
+				tail.append(line.rstrip())
+	returncode = process.wait()
+	if returncode != 0:
+		raise subprocess.CalledProcessError(returncode, command, stderr="\n".join(tail))
 
 
 def capture_git(cwd: Path, args: list[str]) -> str:
+	command = ["git", *args]
 	result = subprocess.run(
-		["git", *args],
+		command,
 		cwd=cwd,
 		text=True,
 		capture_output=True,
@@ -47,7 +67,21 @@ def capture_git(cwd: Path, args: list[str]) -> str:
 		errors="replace",
 		check=False,
 	)
+	if result.returncode != 0:
+		# Without this a failed status would read as an empty diff, i.e. as success.
+		raise subprocess.CalledProcessError(result.returncode, command, stderr=result.stderr or "")
 	return result.stdout or ""
+
+
+def report_command_failure(error: subprocess.CalledProcessError, cwd: Path) -> None:
+	print(f"Command failed ({error.returncode}): {' '.join(error.cmd)}", file=sys.stderr)
+	print(f"  cwd: {cwd}", file=sys.stderr)
+	if error.stderr:
+		print("  git stderr:", file=sys.stderr)
+		for line in error.stderr.splitlines():
+			print(f"    {line}", file=sys.stderr)
+	else:
+		print("  git stderr: (empty)", file=sys.stderr)
 
 
 def find_repo_root(start_path: Path) -> Path:
@@ -203,12 +237,16 @@ def main() -> int:
 			print("=== Remove untracked files ===")
 			discard_untracked(repo_root, dry_run=args.dry_run)
 	except subprocess.CalledProcessError as error:
-		print(f"Command failed ({error.returncode}): {' '.join(error.cmd)}", file=sys.stderr)
+		report_command_failure(error, repo_root)
 		return error.returncode or 1
 	if args.deep_submodules and not args.dry_run:
 		print("=== Verify ===")
-		if not verify_submodules_pristine(repo_root):
-			return 1
+		try:
+			if not verify_submodules_pristine(repo_root):
+				return 1
+		except subprocess.CalledProcessError as error:
+			report_command_failure(error, repo_root)
+			return error.returncode or 1
 	print("Done.")
 	return 0
 

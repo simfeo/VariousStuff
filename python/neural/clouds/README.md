@@ -8,6 +8,7 @@ existing set of 523 hand-drawn PNGs with a hard alpha edge.
 | `autoencoders/` | linear, convolutional and variational autoencoders | reconstructs, but sampling the latent gives blurry blobs with soft alpha |
 | `gan/` | DCGAN on 256x256 RGBA | see `gan/README.md` |
 | `vqvae/` | VQ-VAE with a PixelCNN prior over the code grid | works, see `vqvae/README.md` |
+| `diffusion/` | discrete diffusion with an absorbing state over palette indices | works, see `diffusion/README.md` |
 
 ## Data
 

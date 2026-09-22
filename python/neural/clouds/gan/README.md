@@ -43,9 +43,24 @@ python GAN_256_4_chanels.py --generate --count 16 --checkpoint gan_256.ckpt
 Sample grids land in `out_gan/epoch_NNNN.png` during training, which is the point of
 having them: this architecture can still collapse, and the grids show when.
 
-## What is still not solved
+## The 48x144 version
 
-A centred sprite occupies about 2% of a 256x256 canvas (median), so most of what both
-networks model is emptiness. Centring removes the positional shortcut, not the imbalance.
-Training at the sprites' own aspect ratio, the way `../vqvae` does with a 48x144 frame,
-is the real fix and is not what this script does.
+A centred sprite covers about 2% of a 256x256 canvas, so most of what both networks model
+there is emptiness. `GAN_48x144.py` trains at the sprites' own aspect ratio instead, the
+frame `../vqvae` uses, where a cloud fills roughly a third. It reuses the pieces above and
+pads in the dataset, so it reads `../images` with no prepared copy on disk.
+
+It is the better of the two: cumulus silhouettes with separate humps rather than one
+smooth mound. Over 600 epochs the best samples came from epoch 550, not the last one, and
+neither the sample diversity nor the speckle moved monotonically, so it writes a
+checkpoint every 50 epochs and the last one is not the one to reach for.
+
+## What neither version solves
+
+Both are regressions over continuous RGBA, and the sprites are pixel art. Measured over
+16 generated 48x144 sprites against the 552 colours of the training set: 0.03% of the
+generated pixels land exactly on a palette colour, and no opaque pixel ever equals its
+right-hand neighbour, against 45% in the sources. The output is a dithered gradient in the
+shape of a cloud. `../vqvae` scores 100% and 32% on the same two measures because its
+decoder classifies over the palette instead of regressing colour, which is a property of
+the architecture and not something more training reaches.

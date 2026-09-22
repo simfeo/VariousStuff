@@ -90,3 +90,17 @@ idb
 *.ilk
 *.swp
 *.obj
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Training runs. The scripts under python/neural write these relative to the directory
+# they are launched from, so they appear outside their own folder just as easily.
+lightning_logs/
+out_*/
+images_256/
+ckpt_*/
+*.ckpt
+*.log

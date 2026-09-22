@@ -1,162 +1,182 @@
-import pytorch_lightning as L
-from pytorch_lightning.callbacks import ModelCheckpoint
-import torch
-from torchvision import transforms
-from torch.utils.data import DataLoader, Dataset  # Import Dataset
-import torchvision
-import matplotlib.pyplot as plt
-import numpy as np
-import imageio as iio
+"""DCGAN over 256x256 RGBA cloud sprites.
 
-from PIL import Image
+Every output pixel of the previous version sat on an odd x and an even y: five stacked
+ConvTranspose2d layers with no normalization had collapsed the generator onto a periodic
+lattice instead of a shape. The upsampling, the normalization and the loss below are all
+aimed at that failure. See README.md for the full list.
+"""
+import argparse
+import datetime
 import os
-import sys
 from pathlib import Path
 
-from torch.utils.data import random_split,  DataLoader, Dataset
-
+import numpy as np
+import pytorch_lightning as L
+import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import datetime
+import torchvision
+from PIL import Image
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+
+IMG_SIZE = 256
+CHANNELS = 4
+LATENT_DIM = 128
+BATCH_SIZE = 16
+LR = 2e-4
+# The discriminator is trained against 0.9 rather than 1.0 for real images. It wins this
+# matchup easily, and once it is confident the generator's gradient through the logistic
+# loss all but disappears.
+REAL_LABEL = 0.9
+SAMPLE_EVERY = 10
+DATA_DIR = "images_256"
+OUT_DIR = "out_gan"
+
+
+def weights_init(module):
+    """DCGAN initialization. The paper treats it as part of the method, not a detail:
+    the default Kaiming scheme is tuned for a single network descending one loss, not for
+    two networks that have to stay balanced against each other."""
+    name = module.__class__.__name__
+    if isinstance(module, (nn.Conv2d, nn.ConvTranspose2d)):
+        nn.init.normal_(module.weight, 0.0, 0.02)
+    elif isinstance(module, nn.BatchNorm2d):
+        nn.init.normal_(module.weight, 1.0, 0.02)
+        nn.init.zeros_(module.bias)
+    elif isinstance(module, nn.Linear) and "Generator" not in name:
+        nn.init.normal_(module.weight, 0.0, 0.02)
+
+
+class UpBlock(nn.Module):
+    """PixelShuffle instead of ConvTranspose2d.
+
+    A transposed convolution with stride 2 writes overlapping copies of one kernel, and
+    stacking five of them turned the whole output into a fixed lattice. PixelShuffle
+    predicts the four subpixels of each output block from separate channels, so no
+    position in the block is privileged and nothing accumulates across layers.
+    """
+
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.block = nn.Sequential(
+            nn.Conv2d(in_ch, out_ch * 4, 3, padding=1),
+            nn.PixelShuffle(2),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, x):
+        return self.block(x)
+
+
+class Generator(nn.Module):
+    def __init__(self, latent_dim=LATENT_DIM):
+        super().__init__()
+        self.lin1 = nn.Linear(latent_dim, 512 * 8 * 8)
+        self.bn0 = nn.BatchNorm2d(512)
+        self.ups = nn.Sequential(
+            UpBlock(512, 256),   # 16
+            UpBlock(256, 128),   # 32
+            UpBlock(128, 64),    # 64
+            UpBlock(64, 32),     # 128
+            UpBlock(32, 16),     # 256
+        )
+        self.out = nn.Conv2d(16, CHANNELS, 3, padding=1)
+
+    def forward(self, z):
+        x = self.lin1(z).view(-1, 512, 8, 8)
+        x = torch.relu(self.bn0(x))
+        return torch.tanh(self.out(self.ups(x)))
+
 
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(4, 16, kernel_size=4, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1)
-        self.conv4 = nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1)
-        self.conv5 = nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1)
-        self.lin1 = nn.Linear(256 * 8 * 8, 1)  # Corrected linear layer input size
+
+        def block(in_ch, out_ch, norm=True):
+            layers = [nn.Conv2d(in_ch, out_ch, 4, stride=2, padding=1)]
+            if norm:
+                layers.append(nn.BatchNorm2d(out_ch))
+            layers.append(nn.LeakyReLU(0.2, inplace=True))
+            return layers
+
+        self.net = nn.Sequential(
+            # No normalization on the first block: it sees the raw input distribution,
+            # and normalizing it away costs the discriminator the very statistics that
+            # separate a real sprite from a generated one.
+            *block(CHANNELS, 64, norm=False),   # 128
+            *block(64, 128),                    # 64
+            *block(128, 256),                   # 32
+            *block(256, 256),                   # 16
+            *block(256, 512),                   # 8
+            *block(512, 512),                   # 4
+            # A convolution down to a single value instead of Linear(256*8*8, 1), which
+            # held two thirds of the parameters and invited memorizing 523 sprites.
+            nn.Conv2d(512, 1, 4),
+        )
 
     def forward(self, x):
-        x = F.leaky_relu(self.conv1(x), 0.2)
-        x = F.leaky_relu(self.conv2(x), 0.2)
-        x = F.leaky_relu(self.conv3(x), 0.2)
-        x = F.leaky_relu(self.conv4(x), 0.2)
-        x = F.leaky_relu(self.conv5(x), 0.2)
-        x = x.view(-1, 256 * 8 * 8)  # Flatten before linear layer
-        return torch.sigmoid(self.lin1(x))  # Sigmoid for probability output
+        return self.net(x).view(-1, 1)  # logits, the loss applies the sigmoid
 
-
-class Generator(nn.Module):
-    def __init__(self, latent_dim):
-        super().__init__()
-        self.lin1 = nn.Linear(latent_dim, 8*8*512) # Adjust for 256x256 output
-        self.ct1 = nn.ConvTranspose2d(512, 256, 4, stride=2, padding=1) # Upsample to 16x16
-        self.ct2 = nn.ConvTranspose2d(256, 128, 4, stride=2, padding=1) # Upsample to 32x32
-        self.ct3 = nn.ConvTranspose2d(128, 64, 4, stride=2, padding=1)  # Upsample to 64x64
-        self.ct4 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)   # Upsample to 128x128
-        self.ct5 = nn.ConvTranspose2d(32, 16, 4, stride=2, padding=1)   # Upsample to 256x256
-        self.conv = nn.Conv2d(16, 4, kernel_size=3, padding=1) # Output 4 channels
-
-    def forward(self, x):
-        x = self.lin1(x)
-        x = F.relu(x)
-        x = x.view(-1, 512, 8, 8)
-
-        x = self.ct1(x)
-        x = F.relu(x)
-
-        x = self.ct2(x)
-        x = F.relu(x)
-
-        x = self.ct3(x)
-        x = F.relu(x)
-
-        x = self.ct4(x)
-        x = F.relu(x)
-
-        x = self.ct5(x)
-        x = F.relu(x)
-
-        return torch.tanh(self.conv(x)) # Tanh for normalization to [-1, 1]
-
-  
-# Assuming Generator and Discriminator classes are defined elsewhere
-# For example:
-# class Generator(nn.Module): ...
-# class Discriminator(nn.Module): ...
-
-def rgb_transform(image):
-    return image[:3, :, :]  # Keep only the first 3 channels (RGB)
 
 class RGBAImageDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.image_files = [f for f in os.listdir(root_dir) if f.endswith('.png') or f.endswith('.jpg')]
+        self.image_files = sorted(f for f in os.listdir(root_dir)
+                                  if f.lower().endswith((".png", ".jpg")))
 
     def __len__(self):
         return len(self.image_files)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.root_dir, self.image_files[idx])
-        # image = Image.open(img_path).convert('RGBA')  # Ensure RGBA format
-        image = Image.open(img_path).convert('RGBA')  # Ensure RGBA format
-        if self.transform:
-            image = self.transform(image)
-        return image
+        image = Image.open(os.path.join(self.root_dir, self.image_files[idx])).convert("RGBA")
+        return self.transform(image) if self.transform else image
+
 
 class GAN(L.LightningModule):
-    def __init__(self, latent_dim=100, lr=0.0002, data_dir='images', img_dir = 'class1'):
+    def __init__(self, latent_dim=LATENT_DIM, lr=LR, data_dir=DATA_DIR):
         super().__init__()
         self.save_hyperparameters()
         self.generator = Generator(latent_dim=self.hparams.latent_dim)
         self.discriminator = Discriminator()
-        self.validation_z = torch.randn(6, self.hparams.latent_dim)
-        self.automatic_optimization = False  # Set to False for manual optimization
+        self.generator.apply(weights_init)
+        self.discriminator.apply(weights_init)
+        self.criterion = nn.BCEWithLogitsLoss()
+        # Buffer, so the preview noise follows the model onto the GPU and stays the same
+        # across epochs: the sample grid then shows how one fixed z evolves.
+        self.register_buffer("validation_z", torch.randn(8, latent_dim))
+        self.automatic_optimization = False
 
     def forward(self, z):
         return self.generator(z)
 
-    def adversarial_loss(self, y_hat, y):
-        # Ensure y is the same size as y_hat
-        # if y.size(0) != y_hat.size(0):
-        #     y = y[:y_hat.size(0)]  # Adjust y to match the size of y_hat
-        return F.binary_cross_entropy(y_hat, y)
-
     def training_step(self, batch, batch_idx):
-        real_images = batch
-        real_images = real_images.type(torch.float32)
-        print("real_images shape:", real_images.shape)
-
-        # Sample noise
-        z = torch.randn(real_images.shape[0], self.hparams.latent_dim, device=self.device)
-
-        # Access optimizers
+        real = batch
+        n = real.size(0)
         opt_g, opt_d = self.optimizers()
 
-        # Train Generator
-        fake_images = self(z)
-        print("fake_images shape:", fake_images.shape)
+        real_labels = torch.full((n, 1), REAL_LABEL, device=self.device)
+        fake_labels = torch.zeros(n, 1, device=self.device)
 
-        y_hat = self.discriminator(fake_images)
-        print("y_hat shape:", y_hat.shape)
+        # Discriminator first, on its own noise: reusing the generator step's z trains it
+        # against exactly the samples the generator has just been fitted to.
+        z = torch.randn(n, self.hparams.latent_dim, device=self.device)
+        fake = self(z).detach()
+        d_loss = 0.5 * (self.criterion(self.discriminator(real), real_labels)
+                        + self.criterion(self.discriminator(fake), fake_labels))
+        opt_d.zero_grad(set_to_none=True)
+        self.manual_backward(d_loss)
+        opt_d.step()
 
-        y = torch.ones(real_images.size(0), 1, device=self.device)
-        g_loss = self.adversarial_loss(y_hat, y)
-
-        self.log("g_loss", g_loss, prog_bar=True)
-        opt_g.zero_grad()
+        z = torch.randn(n, self.hparams.latent_dim, device=self.device)
+        gen = self(z)
+        g_loss = self.criterion(self.discriminator(gen), torch.ones(n, 1, device=self.device))
+        opt_g.zero_grad(set_to_none=True)
         self.manual_backward(g_loss)
         opt_g.step()
 
-        # Train Discriminator
-        y_hat_real = self.discriminator(real_images)
-        y_real = torch.ones(real_images.size(0), 1, device=self.device)
-        real_loss = self.adversarial_loss(y_hat_real, y_real)
-
-        fake_images = self(z).detach()
-        y_hat_fake = self.discriminator(fake_images)
-        y_fake = torch.zeros(real_images.size(0), 1, device=self.device)
-        fake_loss = self.adversarial_loss(y_hat_fake, y_fake)
-
-        d_loss = (real_loss + fake_loss) / 2
-        self.log("d_loss", d_loss, prog_bar=True)
-        opt_d.zero_grad()
-        self.manual_backward(d_loss)
-        opt_d.step()
+        self.log_dict({"d_loss": d_loss, "g_loss": g_loss}, prog_bar=True)
 
     def configure_optimizers(self):
         lr = self.hparams.lr
@@ -166,89 +186,85 @@ class GAN(L.LightningModule):
 
     def train_dataloader(self):
         transform = transforms.Compose([
-            transforms.Resize((256, 256)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5))  # Normalize for 4 channels
+            transforms.Normalize((0.5,) * CHANNELS, (0.5,) * CHANNELS),
         ])
         dataset = RGBAImageDataset(root_dir=self.hparams.data_dir, transform=transform)
-        return DataLoader(dataset, batch_size=8, shuffle=True, num_workers=2)
-        
-
-    def on_validation_epoch_end(self):
-        z = self.validation_z.to(self.device)
-        sample = self(z)
-        grid = torchvision.utils.make_grid(sample)
-        self.logger.experiment.add_image('generated_images', grid, self.current_epoch)
+        return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True,
+                          num_workers=2, persistent_workers=True, drop_last=True)
 
     def on_train_epoch_end(self):
-        # super().on_train_epoch_end()
-        # step = 2
-        # if self.current_epoch > 1 and (self.current_epoch % step) == 0:
-        #     torch.save(self, Path(self.logger.log_dir)/"checkpoints"/f"epoch={self.current_epoch}.ckpt")
-        pass
+        """The previous version logged samples from on_validation_epoch_end with no
+        validation dataloader defined, so the hook never fired and 1000 epochs ran blind."""
+        epoch = self.current_epoch + 1
+        metrics = self.trainer.callback_metrics
+        print("epoch %4d  d_loss %.4f  g_loss %.4f"
+              % (epoch, metrics["d_loss"].item(), metrics["g_loss"].item()), flush=True)
+        if epoch % SAMPLE_EVERY and epoch != 1:
+            return
+        self.generator.eval()
+        with torch.no_grad():
+            sample = self(self.validation_z)
+        self.generator.train()
+        grid = torchvision.utils.make_grid(sample, nrow=4, normalize=True, value_range=(-1, 1))
+        if self.logger is not None:
+            self.logger.experiment.add_image("generated", grid, self.current_epoch)
+        os.makedirs(OUT_DIR, exist_ok=True)
+        torchvision.utils.save_image(grid, os.path.join(OUT_DIR, "epoch_%04d.png" % epoch))
 
-    def on_save_checkpoint(self, checkpoint):
-        step = 100
-        current_epoch = self.current_epoch + 1
-        if current_epoch > 1 and (current_epoch % step) == 0:
-            torch.save(checkpoint, Path(self.logger.log_dir)/"checkpoints"/f"epoch={self.current_epoch}.ckpt")
-        return super().on_save_checkpoint(checkpoint)
+
+def save_rgba(tensor, path, alpha_threshold=0.5):
+    """tanh output back to an RGBA PNG.
+
+    save_image(normalize=True) without value_range rescales by the tensor's own min and
+    max over all four channels at once, so both the colours and the silhouette came out
+    at an arbitrary scale. The range here is known: tanh gives [-1, 1]."""
+    img = ((tensor.cpu() + 1) / 2).clamp(0, 1).permute(1, 2, 0).numpy()
+    rgba = (img * 255).astype(np.uint8)
+    # The sources have exactly two alpha values. Nothing in an adversarial loss forces a
+    # hard edge, so it is imposed here rather than hoped for. The cut has to sit at the
+    # middle of the range, not just above zero: the generator leaves faint alpha all over
+    # the empty canvas, and any threshold near 0 keeps every one of those pixels.
+    opaque = img[..., 3] > alpha_threshold
+    rgba[..., 3] = np.where(opaque, 255, 0)
+    rgba[~opaque] = 0
+    Image.fromarray(rgba, mode="RGBA").save(path)
 
 
+def train(args):
+    model = GAN(data_dir=args.data_dir)
+    trainer = L.Trainer(max_epochs=args.epochs, log_every_n_steps=10,
+                        enable_progress_bar=False)
+    trainer.fit(model)
+    trainer.save_checkpoint(args.checkpoint)
+    print("saved %s" % args.checkpoint, flush=True)
 
-if __name__ == '__main__':
-    # Your main code here
-    if len (sys.argv) == 1:
-        gan_model = GAN()
 
-        # checkpoint_callback = ModelCheckpoint(
-        #     dirpath= 'checkpoints/',  # Directory to save checkpoints
-        #     filename='model-{epoch:02d}-{val_loss:.2f}',  # Filename format
-        #     save_top_k=-1,  # Save all checkpoints
-        #     every_n_epochs=2  # Save every 100 epochs
-        # )
-        # trainer = L.Trainer(max_epochs=1000, callbacks=[checkpoint_callback])
-        trainer = L.Trainer(max_epochs=1000)
-        trainer.fit(gan_model)
-    elif sys.argv[1] == "--generate":
-        print ("genarating")
-        # 1. Load the Trained Generator (as you've done)
-        checkpoint = "lightning_logs/version_12/checkpoints/epoch=999-step=10000.ckpt"
-        # checkpoint = "lightning_logs/version_24/checkpoints/epoch=2.ckpt"
-        autoencoder = GAN.load_from_checkpoint(checkpoint)  # Assuming GAN is the class name
-        generator = autoencoder.generator
-        generator.eval()  # Set to evaluation mode
+def generate(args):
+    model = GAN.load_from_checkpoint(args.checkpoint)
+    model.eval().to(args.device)
+    os.makedirs(args.out, exist_ok=True)
+    stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    with torch.no_grad():
+        z = torch.randn(args.count, model.hparams.latent_dim, device=args.device)
+        images = model(z)
+    for i, image in enumerate(images):
+        save_rgba(image, Path(args.out) / ("fake-%s-%02d.png" % (stamp, i)))
+    print("wrote %d images to %s" % (args.count, args.out), flush=True)
 
-        counter = len(sys.argv) != 2 and int(sys.argv[2]) or 1
-        while counter > 0:
-            # 2. Prepare the Input Noise
-            latent_dim = autoencoder.hparams.latent_dim  # Get the latent dimension from the loaded model's hparams
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            generator.to(device)
-            noise = torch.randn(1, latent_dim, device=device)  # Create a batch of 1 image
-            # z = torch.randn(real_image.shape[0],self.hparams.latent_dim)
-            # noise = torch.randn([1, 4, 256, 256], latent_dim, device=device)  # Create a batch of 1 image
 
-            # 3. Generate the Image
-            with torch.no_grad():
-                generated_image = generator(noise)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--generate", action="store_true", help="sample a trained checkpoint")
+    parser.add_argument("--count", type=int, default=16)
+    parser.add_argument("--epochs", type=int, default=400)
+    parser.add_argument("--data-dir", default=DATA_DIR)
+    parser.add_argument("--checkpoint", default="gan_256.ckpt")
+    parser.add_argument("--out", default=OUT_DIR)
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    args = parser.parse_args()
 
-            print ("generated_image shape",generated_image.shape,"N", counter)
-
-            now = datetime.datetime.now()
-            time_stamp = now.strftime('%Y-%m-%d_%H-%M-%S')
-            torchvision.utils.save_image(
-                        generated_image,
-                        Path(os.getcwd()) / f"tgt/fake-{time_stamp}-{counter}.png",
-                        padding=2,
-                        normalize=True,
-                    )
-            counter -= 1
-
+    if args.generate:
+        generate(args)
     else:
-        print ("USAGE:")
-        print ("For training:")
-        print(os.path.basename(__file__))
-        print("")
-        print ("For generating")
-        print(os.path.basename(__file__) + " --generate")
+        train(args)

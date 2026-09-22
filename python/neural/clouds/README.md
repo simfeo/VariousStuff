@@ -6,7 +6,7 @@ existing set of 523 hand-drawn PNGs with a hard alpha edge.
 | folder | approach | outcome |
 |---|---|---|
 | `autoencoders/` | linear, convolutional and variational autoencoders | reconstructs, but sampling the latent gives blurry blobs with soft alpha |
-| `gan/` | DCGAN on 256x256 and on 4-channel input | unstable, mode collapse |
+| `gan/` | DCGAN on 256x256 RGBA | see `gan/README.md` |
 | `vqvae/` | VQ-VAE with a PixelCNN prior over the code grid | works, see `vqvae/README.md` |
 
 ## Data
@@ -15,9 +15,9 @@ existing set of 523 hand-drawn PNGs with a hard alpha edge.
 vary from 8x33 to 48x144 and alpha is strictly binary. The autoencoder and VQ-VAE
 scripts read it through `DATA_DIR` and run as they are.
 
-The GANs are the exception. They were trained on the same sprites padded to a square
-128x128 or 256x256, which is not kept here, so their `data_dir` has to be repointed at a
-set prepared that way.
+The GANs need the same sprites padded to a square canvas. `gan/prepare_256.py` builds
+that set from `images/`, centred; the original preparation pasted every sprite into the
+top left corner, which let the discriminator separate real from fake on position alone.
 
 Sprites larger than 48x144 are downscaled with nearest neighbour, so no colour outside
 the palette can appear.

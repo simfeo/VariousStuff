@@ -24,6 +24,7 @@ once its generator classified rather than regressed.
 | `model.py` | UNet over class embeddings, timestep conditioning, attention at the bottleneck |
 | `diffusion.py` | cosine mask schedule, the training objective, confidence-based sampling |
 | `train.py` | Lightning module, EMA, contact sheets, CLI |
+| `refine.py` | second pass that remasks a sample's defects and repaints them |
 
 ## Running
 
@@ -53,6 +54,28 @@ for a random subset and 0.23 in the sources.
 
 `--temperature` below 1.0 sharpens the per-pixel distribution: fewer stray colours,
 less variety between samples.
+
+## Refining a sample
+
+```
+python refine.py --input samples --out samples_clean --checkpoint ckpt_diff/epoch=0499.ckpt
+```
+
+Sampling leaves two kinds of debris: opaque specks off the sprite and transparent gaps
+inside it. Both come from the reverse process deciding hundreds of pixels at once with no
+coupling between them, and nothing downstream revises a pixel once it settles. `refine.py`
+finds them with connected components, masks them, and asks the model what belongs there,
+which is the task it was trained on. Over 8 samples from epoch 500:
+
+| | components | single pixels | holes | agree | colours | opaque |
+|---|---|---|---|---|---|---|
+| sampled | 2.6 | 11 | 22 | 0.46 | 171 | 0.24 |
+| refined | 1.1 | 0 | 0 | 0.46 | 169 | 0.24 |
+
+Every defect is gone and nothing else moved. The remaining 0.1 components are sprites
+that genuinely hold two clouds. Deleting the specks outright scores about the same, but
+it cannot fill a hole and cannot tell a speck that was the frayed tip of an edge from one
+that was nothing.
 
 ## What one 600 epoch run produced
 

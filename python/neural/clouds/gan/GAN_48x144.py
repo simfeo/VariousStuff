@@ -1,16 +1,14 @@
 """DCGAN at the sprites' own aspect ratio.
 
-The 256x256 version works but spends almost everything on emptiness: a centred cloud
-covers about 2% of that canvas, so both networks mostly model transparent background.
-A 48x144 frame is the shape of the sprites themselves, and the same cloud fills roughly
-a third of it.
-
-Padding happens in the dataset, so this reads the native sprites in ../images directly
-and needs no prepared copy on disk.
+A centred cloud covers about 2% of a 256x256 canvas, so both networks there mostly model
+empty background. In a 48x144 frame the same cloud fills roughly a third. Padding happens
+in the dataset, so this reads the native sprites in ../images with no prepared copy.
 """
 import argparse
+import copy
 import datetime
 import os
+import random
 from pathlib import Path
 
 import imageio.v3 as iio
@@ -30,6 +28,12 @@ IMG_H, IMG_W = 48, 144
 BASE_H, BASE_W = 3, 9
 LATENT_DIM = 128
 BATCH_SIZE = 32
+# Maximum offset in pixels, applied independently on each axis.
+SHIFT = 2
+EMA_DECAY = 0.999
+# Until this many steps the average is just a copy: at 0.999 the random initialization
+# still weighs 62 percent after 480 steps, and early samples show nothing.
+EMA_WARMUP_STEPS = 500
 SAMPLE_EVERY = 10
 CHECKPOINT_EVERY = 50
 DATA_DIR = "../images"
@@ -55,6 +59,17 @@ class Generator(nn.Module):
         return torch.tanh(self.out(self.ups(x)))
 
 
+class MinibatchStdDev(nn.Module):
+    """Appends the batch's own feature spread as an extra channel.
+
+    Collapse is invisible to a discriminator that judges each sample alone: eight
+    identical clouds each look as plausible as one. This makes sameness a visible feature."""
+
+    def forward(self, x):
+        std = x.std(0, unbiased=False).mean()
+        return torch.cat([x, std.expand(x.size(0), 1, x.size(2), x.size(3))], 1)
+
+
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -71,7 +86,8 @@ class Discriminator(nn.Module):
             *block(64, 128),                    # 12x36
             *block(128, 256),                   # 6x18
             *block(256, 512),                   # 3x9
-            nn.Conv2d(512, 1, (BASE_H, BASE_W)),
+            MinibatchStdDev(),
+            nn.Conv2d(512 + 1, 1, (BASE_H, BASE_W)),
         )
 
     def forward(self, x):
@@ -79,14 +95,15 @@ class Discriminator(nn.Module):
 
 
 class SpriteDataset(Dataset):
-    """Native sprites centred on a 48x144 canvas, held in memory as tensors.
+    """Sprites placed on a 48x144 canvas, offset by up to SHIFT pixels each way.
 
-    523 sprites at this size are a few megabytes, so they are padded once at startup
-    rather than on every epoch."""
+    Without it the discriminator sees the same 523 tensors every epoch and memorizes them.
+    Composited per item rather than pre-expanded, which would cost a gigabyte."""
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, shift=SHIFT):
+        self.shift = shift
         names = sorted(n for n in os.listdir(root_dir) if n.lower().endswith(".png"))
-        self.items = []
+        self.sprites = []
         for name in names:
             image = iio.imread(os.path.join(root_dir, name))
             h, w = image.shape[:2]
@@ -96,22 +113,29 @@ class SpriteDataset(Dataset):
                 ys = (np.arange(new_h) / scale).astype(int).clip(0, h - 1)
                 xs = (np.arange(new_w) / scale).astype(int).clip(0, w - 1)
                 image = image[ys][:, xs]
-                h, w = image.shape[:2]
 
-            canvas = np.zeros((IMG_H, IMG_W, 4), np.float32)
-            top, left = (IMG_H - h) // 2, (IMG_W - w) // 2
-            canvas[top:top + h, left:left + w] = image
-            opaque = canvas[..., 3] >= 128
-            canvas[~opaque] = 0
-            canvas[..., 3] = np.where(opaque, 255, 0)
-            tensor = torch.from_numpy(canvas / 255.0).permute(2, 0, 1)
-            self.items.append(tensor * 2 - 1)  # to [-1, 1], matching the generator's tanh
+            opaque = image[..., 3] >= 128
+            image = image.copy()
+            image[~opaque] = 0
+            image[..., 3] = np.where(opaque, 255, 0)
+            self.sprites.append(image)
 
     def __len__(self):
-        return len(self.items)
+        return len(self.sprites)
 
     def __getitem__(self, idx):
-        return self.items[idx]
+        sprite = self.sprites[idx]
+        h, w = sprite.shape[:2]
+        top, left = (IMG_H - h) // 2, (IMG_W - w) // 2
+        # 51 of 523 sprites fill the frame to within two rows, so the offset is clamped
+        # per sprite rather than globally.
+        dy = random.randint(-min(self.shift, top), min(self.shift, IMG_H - h - top))
+        dx = random.randint(-min(self.shift, left), min(self.shift, IMG_W - w - left))
+
+        canvas = np.zeros((IMG_H, IMG_W, 4), np.float32)
+        canvas[top + dy:top + dy + h, left + dx:left + dx + w] = sprite
+        tensor = torch.from_numpy(canvas / 255.0).permute(2, 0, 1)
+        return tensor * 2 - 1  # to [-1, 1], matching the generator's tanh
 
 
 class GAN(L.LightningModule):
@@ -123,6 +147,9 @@ class GAN(L.LightningModule):
         self.generator.apply(weights_init)
         self.discriminator.apply(weights_init)
         self.criterion = nn.BCEWithLogitsLoss()
+        # Sampled from instead of the live generator. Adversarial training oscillates, and
+        # the best epoch of the previous run was 550 out of 600 by luck rather than trend.
+        self.gen_ema = copy.deepcopy(self.generator).requires_grad_(False)
         self.register_buffer("validation_z", torch.randn(8, latent_dim))
         self.automatic_optimization = False
 
@@ -149,8 +176,19 @@ class GAN(L.LightningModule):
         opt_g.zero_grad(set_to_none=True)
         self.manual_backward(g_loss)
         opt_g.step()
+        self.update_ema()
 
         self.log_dict({"d_loss": d_loss, "g_loss": g_loss}, prog_bar=True)
+
+    @torch.no_grad()
+    def update_ema(self):
+        decay = EMA_DECAY if self.global_step >= EMA_WARMUP_STEPS else 0.0
+        for ema, live in zip(self.gen_ema.parameters(), self.generator.parameters()):
+            ema.lerp_(live, 1 - decay)
+        # Buffers are BatchNorm running statistics, which are not gradient-tracked and
+        # have to be carried over rather than averaged.
+        for ema, live in zip(self.gen_ema.buffers(), self.generator.buffers()):
+            ema.copy_(live)
 
     def configure_optimizers(self):
         lr = self.hparams.lr
@@ -170,10 +208,8 @@ class GAN(L.LightningModule):
               % (epoch, metrics["d_loss"].item(), metrics["g_loss"].item()), flush=True)
         if epoch % SAMPLE_EVERY and epoch != 1:
             return
-        self.generator.eval()
         with torch.no_grad():
-            sample = self(self.validation_z)
-        self.generator.train()
+            sample = self.gen_ema.eval()(self.validation_z)
         grid = torchvision.utils.make_grid(sample, nrow=2, padding=4,
                                            normalize=True, value_range=(-1, 1))
         os.makedirs(OUT_DIR, exist_ok=True)
@@ -182,10 +218,8 @@ class GAN(L.LightningModule):
 
 def train(args):
     model = GAN(data_dir=args.data_dir)
-    # Every 50 epochs, kept, not rolled over: the 256 run peaked around epoch 200 and
-    # degraded afterwards, and with only a final checkpoint there was nothing to go back to.
-    # Lightning expands "{epoch:04d}" to "epoch=0049", so the template carries no prefix
-    # of its own: writing "epoch{epoch:04d}" produced files named "epochepoch=0049.ckpt".
+    # Kept, not rolled over: the best samples do not come from the last epoch.
+    # Lightning expands "{epoch:04d}" to "epoch=0049", so the template adds no prefix.
     keeper = ModelCheckpoint(dirpath=args.ckpt_dir, filename="{epoch:04d}",
                              every_n_epochs=CHECKPOINT_EVERY, save_top_k=-1,
                              save_on_train_epoch_end=True)
@@ -203,7 +237,7 @@ def generate(args):
     stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     with torch.no_grad():
         z = torch.randn(args.count, model.hparams.latent_dim, device=args.device)
-        images = model(z)
+        images = model.gen_ema(z)
     for i, image in enumerate(images):
         save_rgba(image, Path(args.out) / ("fake-%s-%02d.png" % (stamp, i)))
     print("wrote %d images to %s" % (args.count, args.out), flush=True)

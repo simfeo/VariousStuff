@@ -34,9 +34,8 @@ OUT_DIR = "out_gan"
 
 
 def weights_init(module):
-    """DCGAN initialization. The paper treats it as part of the method, not a detail:
-    the default Kaiming scheme is tuned for a single network descending one loss, not for
-    two networks that have to stay balanced against each other."""
+    """DCGAN initialization. Kaiming suits one network descending one loss, not two that
+    have to stay balanced against each other."""
     name = module.__class__.__name__
     if isinstance(module, (nn.Conv2d, nn.ConvTranspose2d)):
         nn.init.normal_(module.weight, 0.0, 0.02)
@@ -50,11 +49,9 @@ def weights_init(module):
 class UpBlock(nn.Module):
     """PixelShuffle instead of ConvTranspose2d.
 
-    A transposed convolution with stride 2 writes overlapping copies of one kernel, and
-    stacking five of them turned the whole output into a fixed lattice. PixelShuffle
-    predicts the four subpixels of each output block from separate channels, so no
-    position in the block is privileged and nothing accumulates across layers.
-    """
+    Five stacked transposed convolutions collapsed the output onto a fixed lattice.
+    Here each subpixel of a 2x2 block comes from its own channel, so no position in the
+    block is privileged and nothing accumulates across layers."""
 
     def __init__(self, in_ch, out_ch):
         super().__init__()
@@ -101,9 +98,8 @@ class Discriminator(nn.Module):
             return layers
 
         self.net = nn.Sequential(
-            # No normalization on the first block: it sees the raw input distribution,
-            # and normalizing it away costs the discriminator the very statistics that
-            # separate a real sprite from a generated one.
+            # First block unnormalized: it reads the raw input distribution, which is
+            # part of what separates a real sprite from a generated one.
             *block(CHANNELS, 64, norm=False),   # 128
             *block(64, 128),                    # 64
             *block(128, 256),                   # 32
@@ -216,15 +212,12 @@ class GAN(L.LightningModule):
 def save_rgba(tensor, path, alpha_threshold=0.5):
     """tanh output back to an RGBA PNG.
 
-    save_image(normalize=True) without value_range rescales by the tensor's own min and
-    max over all four channels at once, so both the colours and the silhouette came out
-    at an arbitrary scale. The range here is known: tanh gives [-1, 1]."""
+    Not save_image(normalize=True): without value_range it rescales by the tensor's own
+    min and max across all four channels, putting colour and alpha on an arbitrary scale."""
     img = ((tensor.cpu() + 1) / 2).clamp(0, 1).permute(1, 2, 0).numpy()
     rgba = (img * 255).astype(np.uint8)
-    # The sources have exactly two alpha values. Nothing in an adversarial loss forces a
-    # hard edge, so it is imposed here rather than hoped for. The cut has to sit at the
-    # middle of the range, not just above zero: the generator leaves faint alpha all over
-    # the empty canvas, and any threshold near 0 keeps every one of those pixels.
+    # The sources have two alpha values; nothing in the loss forces a hard edge, so it is
+    # imposed here. The cut sits mid-range because faint alpha covers the empty canvas.
     opaque = img[..., 3] > alpha_threshold
     rgba[..., 3] = np.where(opaque, 255, 0)
     rgba[~opaque] = 0

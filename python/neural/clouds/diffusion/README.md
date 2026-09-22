@@ -25,6 +25,7 @@ once its generator classified rather than regressed.
 | `diffusion.py` | cosine mask schedule, the training objective, confidence-based sampling |
 | `train.py` | Lightning module, EMA, contact sheets, CLI |
 | `refine.py` | second pass that remasks a sample's defects and repaints them |
+| `score.py` | scores a sprite with the model itself and maps where it looks wrong |
 
 ## Running
 
@@ -77,7 +78,36 @@ that genuinely hold two clouds. Deleting the specks outright scores about the sa
 it cannot fill a hole and cannot tell a speck that was the frayed tip of an edge from one
 that was nothing.
 
-## What one 600 epoch run produced
+## Scoring a sprite without a discriminator
+
+```
+python score.py --input samples --reference ../images --maps heat --checkpoint ckpt_diff/epoch=0499.ckpt
+```
+
+The model answers exactly one question, what belonged in the pixels that were erased, so
+that is how it is asked about a finished sprite: erase a random tenth, read the
+probability it gives to what actually stood there, repeat until every pixel has been
+asked a few times. Averaged over the opaque pixels of 8 sprites each:
+
+| | range | mean |
+|---|---|---|
+| hand-drawn | 1.09 - 1.59 | 1.21 |
+| generated | 1.32 - 2.17 | 1.56 |
+
+A cut at 1.22 sorts 15 of the 16 correctly, so the model does tell its own output from
+the training set with no discriminator and no further training. It is a signal, not a
+confident verdict on a single sprite.
+
+Average over opaque pixels only. Over the whole canvas the number tracks sprite size
+rather than plausibility, because empty background is trivial to predict: across the
+training sprites that version runs from 0.07 for the smallest to 0.51 for the largest,
+in the same order as their opaque area.
+
+The per-pixel map is the part a discriminator cannot match. A discriminator returns one
+number and needs gradients through the input to say where the problem is; here the
+localization is the raw measurement and the single number is the summary. Note that the
+summary is a poor defect detector on its own: `refine.py` clears every speck and hole but
+moves the mean only from 1.56 to 1.55, since it touches some 30 pixels out of 6912.
 
 Measured over 8 samples per checkpoint. `agree` is the share of opaque pixels equal to
 their right neighbour, `comp` the mean number of connected components per sprite.

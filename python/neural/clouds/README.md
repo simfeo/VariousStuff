@@ -10,6 +10,30 @@ existing set of 523 hand-drawn PNGs with a hard alpha edge.
 | `vqvae/` | VQ-VAE with a PixelCNN prior over the code grid | works, see `vqvae/README.md` |
 | `diffusion/` | discrete diffusion with an absorbing state over palette indices | works, see `diffusion/README.md` |
 
+## What separated them
+
+The sprites are pixel art, and the deciding question turned out to be whether a model
+picks a palette entry per pixel or regresses a colour. Measured over generated sprites
+against the 552 colours of the training set:
+
+| | on a palette colour | equal to right neighbour | components |
+|---|---|---|---|
+| DCGAN over RGBA | 0.03% | 0.00 | |
+| palette GAN, epoch 500 | 100% | 0.47 | 1.1 |
+| diffusion, epoch 500 | 100% | 0.46 | 2.6 |
+| diffusion, refined | 100% | 0.46 | 1.1 |
+| sources | 100% | 0.51 | 1.0 |
+
+The regression GAN never once repeated a colour in two neighbouring pixels and drew a
+dithered gradient shaped like a cloud. No amount of training moved that, and both models
+that classify cleared it from their first sampled epoch. `vqvae/` scores the same way and
+for the same reason.
+
+Training behaviour separated them the other way round. The adversarial runs were a
+lottery until the generator was pretrained with cross entropy: three runs from random
+initialization either sat in noise or collapsed to an empty frame. Diffusion improved
+near-monotonically for 500 epochs on the first attempt, with no collapse and no restart.
+
 ## Data
 
 `images/` holds the training set: 523 RGBA sprites cropped to their content, so sizes
